@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 
 import 'backend/weatherdata.dart';
 import 'main.dart';
@@ -15,24 +16,13 @@ class WeatherPage extends StatefulWidget {
 }
 
 class _WeatherPageState extends State<WeatherPage> {
-  bool _isLoading = true;
-  String _timeString = "";
-  String _minute = "";
+  DateTime _dateTime = DateTime.now();
   Timer _timer;
-  WeatherData _weatherData;
 
   @override
   void initState() {
     super.initState();
-    loadWeather();
-    if (DateTime.now().minute < 10) {
-      _minute = "0${DateTime.now().minute.toString()}";
-    } else {
-      _minute = DateTime.now().minute.toString();
-    }
-    _timeString = "${DateTime.now().hour}:$_minute";
-    _timer =
-        Timer.periodic(Duration(seconds: 1), (Timer t) => _getCurrentTime());
+    _updateTime();
   }
 
   void dispose() {
@@ -44,9 +34,7 @@ class _WeatherPageState extends State<WeatherPage> {
     final Response jsonAddress = await Client().get(Uri.encodeFull(
         "https://api.openweathermap.org/data/2.5/weather/?appid=207d22dfb93ecdec162c7a496c3592f4&units=metric&lat=51.315334&lon=9.488239"));
     final jsonResponse = json.decode(jsonAddress.body);
-    _weatherData = WeatherData.fromJson(jsonResponse);
-    // CircularProgressIndicator wieder deaktivieren, wenn der Text geladen wurde.
-    setState(() => _isLoading = false);
+    return WeatherData.fromJson(jsonResponse);
   }
 
   weekDay() {
@@ -68,64 +56,70 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
-  weather() {
-    switch (_weatherData.weather[0].main) {
-      case "Thunderstorm":
-        return "Gewitter";
-      case "Drizzle":
-        return "Nieselregen";
-      case "Rain":
-        return "Regen";
-      case "Snow":
-        return "Schnee";
-      case "Mist":
-        return "Nebel";
-      case "Smoke":
-        return "Rauch";
-      case "Haze":
-        return "Dunst";
-      case "Dust":
-        return "Staub";
-      case "Fog":
-        return "Nebel";
-      case "Sand":
-        return "Sand";
-      case "Ash":
-        return "Asche";
-      case "Squall":
-        return "Böen";
-      case "Tornado":
-        return "Tornado";
-      case "Clear":
-        return "Klar";
-      case "Clouds":
-        return "Bewölkt";
-      default:
-        return _weatherData.weather[0].main;
-    }
-  }
-
-  void _getCurrentTime() {
-    if (DateTime.now().minute < 10) {
-      _minute = "0" + DateTime.now().minute.toString();
-    } else {
-      _minute = DateTime.now().minute.toString();
-    }
+  void _updateTime() {
     setState(() {
-      _timeString = "${DateTime.now().hour}:$_minute";
+      _dateTime = DateTime.now();
+      // Einmal pro Minute aktualisieren
+      _timer = Timer(
+        Duration(minutes: 1) -
+            Duration(seconds: _dateTime.second) -
+            Duration(milliseconds: _dateTime.millisecond),
+        _updateTime,
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final _time = DateFormat('HH:mm').format(_dateTime);
+
     return Scaffold(
       appBar: EngelsburgAppBar(
         text: "Wetter",
         withBackButton: true,
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
+      body: FutureBuilder(
+        future: loadWeather(),
+        builder: (context, snapshot) {
+          weather() {
+            switch (snapshot.data.weather[0].main) {
+              case "Thunderstorm":
+                return "Gewitter";
+              case "Drizzle":
+                return "Nieselregen";
+              case "Rain":
+                return "Regen";
+              case "Snow":
+                return "Schnee";
+              case "Mist":
+                return "Nebel";
+              case "Smoke":
+                return "Rauch";
+              case "Haze":
+                return "Dunst";
+              case "Dust":
+                return "Staub";
+              case "Fog":
+                return "Nebel";
+              case "Sand":
+                return "Sand";
+              case "Ash":
+                return "Asche";
+              case "Squall":
+                return "Böen";
+              case "Tornado":
+                return "Tornado";
+              case "Clear":
+                return "Klar";
+              case "Clouds":
+                return "Bewölkt";
+              default:
+                return snapshot.data.weather[0].main;
+            }
+          }
+
+          if (snapshot.hasData)
+            return RefreshIndicator(
               // Beim Wischen von oben nach unten, Wetter aktualisieren
               onRefresh: () => loadWeather(),
               child: ListView(
@@ -150,7 +144,7 @@ class _WeatherPageState extends State<WeatherPage> {
                             child: Padding(
                               padding: const EdgeInsets.only(top: 24.0),
                               child: Text(
-                                _timeString,
+                                _time,
                                 style: TextStyle(
                                     fontSize: 64,
                                     fontWeight: FontWeight.bold,
@@ -211,7 +205,7 @@ class _WeatherPageState extends State<WeatherPage> {
                             // (icon ID wird von der JSON API abgerufen und in die Bild-URL miteingefügt)
                             Image.network(
                               "http://openweathermap.org/img/wn/" +
-                                  _weatherData.weather[0].icon +
+                                  snapshot.data.weather[0].icon +
                                   "@2x.png",
                             ),
                             Flexible(
@@ -229,7 +223,7 @@ class _WeatherPageState extends State<WeatherPage> {
                           children: [
                             Flexible(
                               child: AutoSizeText(
-                                _weatherData.mainData.temp.round().toString() +
+                                snapshot.data.mainData.temp.round().toString() +
                                     "°",
                                 style: TextStyle(
                                     fontSize: 128, fontWeight: FontWeight.w200),
@@ -241,7 +235,7 @@ class _WeatherPageState extends State<WeatherPage> {
                               child: Column(
                                 children: <Widget>[
                                   Text(
-                                    _weatherData.mainData.tempMax
+                                    snapshot.data.mainData.tempMax
                                             .round()
                                             .toString() +
                                         " °C",
@@ -249,7 +243,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                   ),
                                   Divider(),
                                   Text(
-                                    _weatherData.mainData.tempMin
+                                    snapshot.data.mainData.tempMin
                                             .round()
                                             .toString() +
                                         " °C",
@@ -265,7 +259,10 @@ class _WeatherPageState extends State<WeatherPage> {
                   ),
                 ],
               ),
-            ),
+            );
+          return Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 }

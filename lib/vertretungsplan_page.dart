@@ -11,8 +11,9 @@ class VertretungsplanPage extends StatefulWidget {
 }
 
 class VertretungsplanPageState extends State<VertretungsplanPage>
-    with SingleTickerProviderStateMixin {
-  bool _isLoading = true;
+    with
+        AutomaticKeepAliveClientMixin<VertretungsplanPage>,
+        SingleTickerProviderStateMixin {
   bool _isLoggedIn = false;
   bool _noSubstitutionsAvailable = false;
   bool _wrongPassword = false;
@@ -20,7 +21,6 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
   final List<dom.Element> _substitutionDays = [];
   final List<String> _dayList = [];
   List<String> _allClasses = [];
-  SharedPreferences _prefs;
   String _input;
   String _lastChanged = "";
   String _selectedClass;
@@ -28,41 +28,40 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
   String untisWeek = "";
   TabController _tabController;
   final TextEditingController _textEditingController = TextEditingController();
+  Future _getSubstitutionPlan;
 
   @override
   void initState() {
     super.initState();
+    _getSubstitutionPlan = _getSubstitutionPlanInit();
     _tabController = TabController(length: 2, vsync: this);
-    _checkLogin();
-    _getNavbar();
-    _filterForClass();
-    _getTables();
   }
 
-  _checkLogin() async {
-    _prefs = await SharedPreferences.getInstance();
+  Future _checkLogin() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
     _isLoggedIn = (_prefs.getBool('isLoggedIn') ?? false);
     await _prefs.setBool('isLoggedIn', _isLoggedIn);
   }
 
-  _logIn() async {
-    _prefs = await SharedPreferences.getInstance();
+  Future _logIn() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
     await _prefs.setBool('isLoggedIn', true);
     setState(() => _isLoggedIn = (_prefs.getBool('isLoggedIn') ?? false));
   }
 
-  _filterForClass() async {
-    _prefs = await SharedPreferences.getInstance();
+  Future _filterForClass() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
     _selectedClass = (_prefs.getString('selectedClass'));
     await _prefs.setString('selectedClass', _selectedClass);
   }
 
-  _setFilteredClass() async {
-    _prefs = await SharedPreferences.getInstance();
+  Future _setFilteredClass() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
     await _prefs.setString('selectedClass', _selectedClass);
   }
 
   Future _getNavbar() async {
+    final SharedPreferences _prefs = await SharedPreferences.getInstance();
     final Response navbar = await Client().get(Uri.encodeFull(
         'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/frames/navbar.htm'));
     final dom.Document document = parse(navbar.body);
@@ -70,19 +69,19 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
         document.querySelector("select.selectbox > option");
     final String info = document.querySelector("span.description").text;
     _lastChanged = info.substring(info.indexOf("Stand:")).trim();
-    setState(() {
-      untisWeek = navbarWeek.attributes["value"];
-      // Klassenliste aus dem Javascript-Element der Seite in eine List<String> konvertieren
-      _allClasses = navbar.body
-          .substring(navbar.body.indexOf("var classes"),
-              navbar.body.lastIndexOf("var flcl"))
-          .trim()
-          .replaceAll("var classes = [", "")
-          .replaceAll("];", "")
-          .replaceAll("\"", "")
-          .split(",");
-      _allClasses.insert(0, "Alle Klassen anzeigen");
-    });
+
+    untisWeek = navbarWeek.attributes["value"];
+    // Klassenliste aus dem Javascript-Element der Seite in eine List<String> konvertieren
+    _allClasses = navbar.body
+        .substring(
+            navbar.body.indexOf("var classes = ["), navbar.body.indexOf("];"))
+        .trim()
+        .replaceFirst("var classes = [", "")
+        .replaceFirst("];", "")
+        .replaceAll("\"", "")
+        .split(",");
+    _allClasses.insert(0, "Alle Klassen anzeigen");
+    _prefs.setStringList('allClasses', _allClasses);
   }
 
   Future _getTables() async {
@@ -112,16 +111,20 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
           _newsDays.add(_allTables[i].querySelector("tbody"));
         }
       }
-
-      // CircularProgressIndicator wieder deaktivieren, wenn der Text geladen wurde.
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() {});
     });
+  }
+
+  Future _getSubstitutionPlanInit() async {
+    await _checkLogin();
+    await _getNavbar();
+    await _filterForClass();
+    await _getTables();
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: _isLoggedIn
           ? TabBar(
@@ -146,8 +149,11 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
               ],
             )
           : null,
-      body: !_isLoggedIn && !_isLoading
-          ? Column(
+      body: FutureBuilder(
+        future: _getSubstitutionPlan,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done && !_isLoggedIn)
+            return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -200,8 +206,10 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                   }),
                 ),
               ],
-            )
-          : TabBarView(
+            );
+
+          if (snapshot.connectionState == ConnectionState.done && _isLoggedIn)
+            return TabBarView(
               controller: _tabController,
               children: [
                 ListView.builder(
@@ -224,17 +232,28 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                     for (int i = 0; i < _currentColumns.length; i++) {
                       final List<dom.Element> _currentRow =
                           _currentColumns[i].querySelectorAll("td");
-                      _classes.add(_currentRow[0].text.trim());
-                      _hours.add(_currentRow[1].text.trim());
-                      _subjects.add(_currentRow[2].text.trim());
-                      _substitutionTeachers
-                          .add(_currentRow[3].text.trim().replaceAll("+", ""));
-                      _teachers.add(_currentRow[4].text.trim());
-                      _substitutionTypes.add(_currentRow[5].text.trim());
-                      _substitutionSpan.add(_currentRow[6].text.trim());
-                      _rooms.add(
-                          _currentRow[7].text.trim().replaceAll("---", ""));
-                      _substitutionInformation.add(_currentRow[8].text.trim());
+                      if (_currentRow[1].text.trim().isEmpty &&
+                          _currentRow[8].text.trim().isNotEmpty) {
+                        int lastSubstitution = _classes
+                            .lastIndexWhere((_class) => _class.isNotEmpty);
+                        _substitutionInformation[lastSubstitution] =
+                            _substitutionInformation[lastSubstitution] +
+                                " " +
+                                _currentRow[8].text.trim();
+                      } else {
+                        _classes.add(_currentRow[0].text.trim());
+                        _hours.add(_currentRow[1].text.trim());
+                        _subjects.add(_currentRow[2].text.trim());
+                        _substitutionTeachers.add(
+                            _currentRow[3].text.trim().replaceAll("+", ""));
+                        _teachers.add(_currentRow[4].text.trim());
+                        _substitutionTypes.add(_currentRow[5].text.trim());
+                        _substitutionSpan.add(_currentRow[6].text.trim());
+                        _rooms.add(
+                            _currentRow[7].text.trim().replaceAll("---", ""));
+                        _substitutionInformation
+                            .add(_currentRow[8].text.trim());
+                      }
                     }
                     if (!_classes.contains(_selectedClass) &&
                         _selectedClass != "Alle Klassen anzeigen" &&
@@ -243,6 +262,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                     } else {
                       _noSubstitutionsAvailable = false;
                     }
+
                     return Column(
                       children: [
                         Padding(
@@ -315,11 +335,28 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                   } else {
                                     _hideElement = true;
                                   }
+
+                                  MaterialColor _substitutionTypeColor() {
+                                    switch (_substitutionTypes[index2]) {
+                                      case "Betreuung":
+                                        return Colors.teal;
+                                      case "eigenv. Arb.":
+                                        return Colors.purple;
+                                      case "Entfall":
+                                        return Colors.red;
+                                      case "Raum-Vtr.":
+                                        return Colors.green;
+                                      default:
+                                        return Colors.blue;
+                                    }
+                                  }
+
                                   return Column(
                                     children: <Widget>[
                                       _hideElement
                                           ? Container()
                                           : Card(
+                                              color: _substitutionTypeColor(),
                                               child: Padding(
                                                 padding:
                                                     const EdgeInsets.all(6.0),
@@ -500,7 +537,13 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                   },
                 ),
               ],
-            ),
+            );
+          return Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

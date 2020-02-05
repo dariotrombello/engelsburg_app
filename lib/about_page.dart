@@ -69,11 +69,13 @@ class _AboutPageState extends State<AboutPage> {
                 "https://play.google.com/store/apps/details?id=de.dariotrombello.engelsburg_app"),
           ),
           ListTile(
-              leading: Icon(Icons.code),
-              title: Text(
-                'Quellcode auf GitHub (vorübergehend privat)',
-              ),
-              onTap: null),
+            leading: Icon(Icons.code),
+            title: Text(
+              'Quellcode auf GitHub',
+            ),
+            onTap: () => url_launcher
+                .launch("https://github.com/dariotrombello/engelsburg_app"),
+          ),
           ListTile(
             leading: Icon(Icons.open_in_new),
             title: Text(

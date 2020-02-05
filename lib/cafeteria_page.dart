@@ -9,7 +9,8 @@ class CafeteriaPage extends StatefulWidget {
   _CafeteriaPageState createState() => _CafeteriaPageState();
 }
 
-class _CafeteriaPageState extends State<CafeteriaPage> {
+class _CafeteriaPageState extends State<CafeteriaPage>
+    with AutomaticKeepAliveClientMixin<CafeteriaPage> {
   bool _isLoading = true;
   final List<String> _cafeteriaDetailList = [];
 
@@ -26,8 +27,9 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
     final List<dom.Element> cafeteria =
         document.querySelectorAll("div.entry-content > p");
     for (var cafeteriaDetail in cafeteria) {
-      _cafeteriaDetailList.add(cafeteriaDetail.text);
-      _cafeteriaDetailList.add("\n");
+      _cafeteriaDetailList.add(cafeteriaDetail.outerHtml
+          .replaceAll("<br>", "\n")
+          .replaceAll(RegExp(r'<[^>]*>'), ''));
     }
     // CircularProgressIndicator wieder deaktivieren, wenn der Text geladen wurde.
     setState(() {
@@ -37,21 +39,38 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return _isLoading
         ? Center(child: CircularProgressIndicator())
         : ListView(
             padding: const EdgeInsets.all(16.0),
             children: <Widget>[
-              Center(
-                  child: Text(_cafeteriaDetailList[0],
-                      style: TextStyle(fontWeight: FontWeight.w700))),
-              // Erstes Element in der Liste überspringen,
-              // da das bereits angezeigt wird und join() verwenden,
-              // um unerwünschte Zeichen auszublenden und mit \n einen Absatz einzufügen.
-              Text(
-                _cafeteriaDetailList.sublist(1).join("\n"),
-              )
+              Padding(
+                  padding: EdgeInsets.only(bottom: 16.0),
+                  child: Center(
+                      child: Text(_cafeteriaDetailList[0],
+                          style: TextStyle(fontWeight: FontWeight.w700)))),
+              ListView.builder(
+                itemCount: _cafeteriaDetailList.length,
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  // Erstes Element in der Liste überspringen,
+                  // da das bereits angezeigt wird und join() verwenden,
+                  // um unerwünschte Zeichen auszublenden und mit \n einen Absatz einzufügen.
+                  return Card(
+                      child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(_cafeteriaDetailList.sublist(1)[
+                              index + 1 == _cafeteriaDetailList.length
+                                  ? index - 1
+                                  : index])));
+                },
+              ),
             ],
           );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

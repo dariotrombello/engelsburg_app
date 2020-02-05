@@ -14,7 +14,8 @@ class NewsPage extends StatefulWidget {
   State<StatefulWidget> createState() => NewsPageState();
 }
 
-class NewsPageState extends State<NewsPage> {
+class NewsPageState extends State<NewsPage>
+    with AutomaticKeepAliveClientMixin<NewsPage> {
   Future<List<wp.Post>> _posts;
   static wp.WordPress _wordPress =
       wp.WordPress(baseUrl: 'https://engelsburg.smmp.de');
@@ -72,59 +73,61 @@ class NewsPageState extends State<NewsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder<List<wp.Post>>(
-        future: _posts,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data.isEmpty)
-            return Center(child: CircularProgressIndicator());
-          else if (snapshot.hasData) {
-            return RefreshIndicator(
-              onRefresh: fetchPosts,
-              child: ListView.builder(
-                itemCount: snapshot.data.length,
-                itemBuilder: (context, index) {
-                  final String title = snapshot.data[index].title.rendered;
-                  final String content = snapshot.data[index].content.rendered;
-                  return _buildPostCard(
-                    title: title,
-                    content: content,
-                  );
-                },
-              ),
-            );
-          } else if (snapshot.hasError) {
-            // Wenn die Nachrichten nicht geladen werden können, wird die Schaltfläche zum Neuladen angezeigt.
-            return Column(
-              children: <Widget>[
-                Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Text(
-                      snapshot.error.toString(),
-                      style: TextStyle(color: Colors.red),
-                    )),
-                SizedBox(
-                  height: 50,
-                  width: 200,
-                  child: RaisedButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0)),
-                    color: Colors.blue,
-                    onPressed: () {
-                      fetchPosts();
-                    },
-                  ),
-                )
-              ],
-            );
-          }
-          return Center(
-            child: CircularProgressIndicator(),
+    super.build(context);
+    return FutureBuilder<List<wp.Post>>(
+      future: _posts,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data.isEmpty)
+          return Center(child: CircularProgressIndicator());
+        else if (snapshot.hasData) {
+          return RefreshIndicator(
+            onRefresh: fetchPosts,
+            child: ListView.builder(
+              itemCount: snapshot.data.length,
+              itemBuilder: (context, index) {
+                final String title = snapshot.data[index].title.rendered;
+                final String content = snapshot.data[index].content.rendered;
+                return _buildPostCard(
+                  title: title,
+                  content: content,
+                );
+              },
+            ),
           );
-        },
-      ),
+        } else if (snapshot.hasError) {
+          // Wenn die Nachrichten nicht geladen werden können, wird die Schaltfläche zum Neuladen angezeigt.
+          return Column(
+            children: <Widget>[
+              Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Text(
+                    snapshot.error.toString(),
+                    style: TextStyle(color: Colors.red),
+                  )),
+              SizedBox(
+                height: 50,
+                width: 200,
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0)),
+                  color: Colors.blue,
+                  onPressed: () {
+                    fetchPosts();
+                  },
+                ),
+              )
+            ],
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class NewsPageIndepth extends StatelessWidget {
@@ -146,6 +149,7 @@ class NewsPageIndepth extends StatelessWidget {
             onLinkTap: (link) => url_launcher.launch(link),
             data: content,
             useRichText: true,
+            renderNewlines: true,
           )
         ],
       ),

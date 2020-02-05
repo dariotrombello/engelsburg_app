@@ -5,6 +5,7 @@ import 'ag-list_page.dart';
 import 'cafeteria_page.dart';
 import 'news_page.dart';
 import 'schuelerzeitung_page.dart';
+import 'settings_page.dart';
 import 'solarpanel_page.dart';
 import 'termine_page.dart';
 import 'vertretungsplan_page.dart';
@@ -24,18 +25,23 @@ class EngelsburgApp extends StatefulWidget {
 }
 
 class _EngelsburgAppState extends State<EngelsburgApp> {
-  int _currentIndex = 0;
+  final PageController _pageController = PageController();
 
-  final List<Widget> _children = [
-    NewsPage(),
-    CafeteriaPage(),
-    SchuelerzeitungPage(),
-    VertretungsplanPage()
-  ];
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        children: <Widget>[
+          NewsPage(),
+          CafeteriaPage(),
+          SchuelerzeitungPage(),
+          VertretungsplanPage()
+        ],
+        physics: NeverScrollableScrollPhysics(),
+      ),
       drawer: Drawer(
         child: ListView(
           children: <Widget>[
@@ -87,6 +93,15 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
               onTap: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => WeatherPage())),
             ),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text(
+                "Einstellungen",
+              ),
+              onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => SettingsPage())),
+            ),
           ],
         ),
       ),
@@ -94,10 +109,9 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
         text: "Engelsburg-App",
         withBackButton: false,
       ),
-      body: IndexedStack(children: _children, index: _currentIndex),
       bottomNavigationBar: BottomNavigationBar(
-        onTap: onTabTapped,
         currentIndex: _currentIndex,
+        onTap: onTabTapped,
         items: [
           BottomNavigationBarItem(
               activeIcon: Icon(
@@ -149,6 +163,7 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
   }
 
   void onTabTapped(int index) {
+    _pageController.jumpToPage(index);
     setState(() {
       _currentIndex = index;
     });
