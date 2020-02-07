@@ -20,12 +20,7 @@ class NewsPageState extends State<NewsPage>
   static wp.WordPress _wordPress =
       wp.WordPress(baseUrl: 'https://engelsburg.smmp.de');
 
-  void initState() {
-    super.initState();
-    fetchPosts();
-  }
-
-  Future<void> fetchPosts() {
+  Future<void> _fetchPosts() {
     setState(() {
       _posts = _wordPress.fetchPosts(
         postParams: wp.ParamsPostList(
@@ -35,38 +30,63 @@ class NewsPageState extends State<NewsPage>
           order: wp.Order.desc,
           orderBy: wp.PostOrderBy.date,
         ),
+        /* fetchFeaturedMedia: true */
       );
     });
     return _posts;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _posts = _fetchPosts();
+  }
+
   Widget _buildPostCard({
     final String content,
     final String title,
-    wp.Media featuredMedia,
+    /* wp.Media featuredMedia */
   }) {
-    final String renderedContent =
-        HtmlUnescape().convert(content).replaceAll(RegExp(r'<[^>]*>'), '');
+    final String renderedContent = HtmlUnescape()
+        .convert(content)
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .trim();
     final String renderedTitle =
-        HtmlUnescape().convert(title).replaceAll(RegExp(r'<[^>]*>'), '');
+        HtmlUnescape().convert(title).replaceAll(RegExp(r'<[^>]*>'), '').trim();
     return Card(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        NewsPageIndepth(renderedTitle, content)));
-              },
-              title: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 4.0),
-                  child: Text(renderedTitle)),
-              subtitle: Text(renderedContent,
-                  maxLines: 5, overflow: TextOverflow.ellipsis)),
-        ],
+      child: InkWell(
+        borderRadius: BorderRadius.circular(4.0),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  NewsPageIndepth(renderedTitle, content)));
+        },
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /* if (featuredMedia.mediaDetails.sizes.mediumLarge.sourceUrl !=
+                  null)
+                Image.network(
+                    featuredMedia.mediaDetails.sizes.mediumLarge.sourceUrl), */
+              Text(
+                renderedTitle,
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18.0),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: Text(
+                  renderedContent,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(height: 1.5),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -77,19 +97,20 @@ class NewsPageState extends State<NewsPage>
     return FutureBuilder<List<wp.Post>>(
       future: _posts,
       builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data.isEmpty)
-          return Center(child: CircularProgressIndicator());
-        else if (snapshot.hasData) {
+        if (snapshot.hasData) {
           return RefreshIndicator(
-            onRefresh: fetchPosts,
+            onRefresh: () => _posts,
             child: ListView.builder(
               itemCount: snapshot.data.length,
               itemBuilder: (context, index) {
                 final String title = snapshot.data[index].title.rendered;
                 final String content = snapshot.data[index].content.rendered;
+                /* final wp.Media featuredMedia =
+                    snapshot.data[index].featuredMedia; */
                 return _buildPostCard(
                   title: title,
                   content: content,
+                  /* featuredMedia: featuredMedia */
                 );
               },
             ),
@@ -111,9 +132,7 @@ class NewsPageState extends State<NewsPage>
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30.0)),
                   color: Colors.blue,
-                  onPressed: () {
-                    fetchPosts();
-                  },
+                  onPressed: () => _posts,
                 ),
               )
             ],
@@ -132,20 +151,30 @@ class NewsPageState extends State<NewsPage>
 
 class NewsPageIndepth extends StatelessWidget {
   final content;
-  final renderedTitle;
-  NewsPageIndepth(this.renderedTitle, this.content);
+  final title;
+  NewsPageIndepth(this.title, this.content);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: EngelsburgAppBar(
-        text: renderedTitle,
+        text: "News",
         withBackButton: true,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(bottom: 16.0),
+            child: Text(
+              title,
+              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Divider(),
           Html(
+            defaultTextStyle: TextStyle(
+                fontFamily: "Montserrat", fontSize: 16.0, height: 1.5),
             onLinkTap: (link) => url_launcher.launch(link),
             data: content,
             useRichText: true,

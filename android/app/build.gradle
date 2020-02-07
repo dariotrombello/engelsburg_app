@@ -44,7 +44,7 @@ android {
 
     defaultConfig {
         applicationId "de.dariotrombello.engelsburg_app"
-        minSdkVersion 21
+        minSdkVersion 16
         targetSdkVersion 29
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

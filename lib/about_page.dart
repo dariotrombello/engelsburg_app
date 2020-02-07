@@ -63,7 +63,7 @@ class _AboutPageState extends State<AboutPage> {
           ListTile(
             leading: Icon(Icons.star_half),
             title: Text(
-              'App Bewerten',
+              'App bewerten',
             ),
             onTap: () => url_launcher.launch(
                 "https://play.google.com/store/apps/details?id=de.dariotrombello.engelsburg_app"),

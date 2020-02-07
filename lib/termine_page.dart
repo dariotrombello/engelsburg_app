@@ -6,21 +6,9 @@ import 'package:http/http.dart';
 
 import 'main.dart';
 
-class TerminePage extends StatefulWidget {
-  @override
-  _TerminePageState createState() => _TerminePageState();
-}
-
-class _TerminePageState extends State<TerminePage> {
-  bool _isLoading = true;
-  final List<String> _termineStringList = [];
-
-  void initState() {
-    super.initState();
-    getTermine();
-  }
-
-  Future getTermine() async {
+class TerminePage extends StatelessWidget {
+  Future _getTermine() async {
+    final List<String> _termineStringList = [];
     final Response termine =
         await Client().get('https://engelsburg.smmp.de/organisation/termine/');
     final dom.Document document = parse(termine.body);
@@ -29,7 +17,7 @@ class _TerminePageState extends State<TerminePage> {
     for (var termin in termineList) {
       _termineStringList.add(termin.text);
     }
-    setState(() => _isLoading = false);
+    return _termineStringList;
   }
 
   @override
@@ -39,40 +27,46 @@ class _TerminePageState extends State<TerminePage> {
         text: 'Termine',
         withBackButton: true,
       ),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: _termineStringList.length,
-              itemBuilder: (context, index) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text(
-                          _termineStringList[index].substring(0, 10),
-                          style: TextStyle(fontSize: 20),
+      body: FutureBuilder(
+        future: _getTermine(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData)
+            return RefreshIndicator(
+              onRefresh: () => _getTermine(),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: snapshot.data.length,
+                itemBuilder: (context, index) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            snapshot.data[index].substring(0, 10),
+                            style: TextStyle(fontSize: 20),
+                          ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 5.0),
-                      child: Text(
-                        _termineStringList[index].substring(12),
-                        style: TextStyle(fontSize: 16),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 5.0),
+                        child: Text(
+                          snapshot.data[index].substring(12),
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12.0),
-                    ),
-                  ],
-                );
-              },
-            ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12.0),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
+          return Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 }

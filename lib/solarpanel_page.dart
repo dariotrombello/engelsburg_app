@@ -12,19 +12,13 @@ class SolarPanelPage extends StatefulWidget {
 }
 
 class _SolarPanelPageState extends State<SolarPanelPage> {
-  bool _isLoading = true;
-  final List<String> _solarDescription = [];
   String _solarAvoidedCarbonDioxide = "";
   String _solarDate = "";
   String _solarEnergy = "";
   String _solarRevenue = "";
 
-  void initState() {
-    super.initState();
-    getSolarPanelData();
-  }
-
-  Future getSolarPanelData() async {
+  Future<List<String>> _getSolarPanelData() async {
+    final List<String> _solarDescription = [];
     final Response solarDataLink = await Client().get(Uri.encodeFull(
         'https://www.sunnyportal.com/Templates/PublicPageOverview.aspx?plant=554d90c7-84a2-474c-94db-d2ac5f5af3c3&splang=de-DE'));
     final Response solarDescriptionLink = await Client().get(Uri.encodeFull(
@@ -54,8 +48,7 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
         .querySelector(
             "div.base-label-titel > #ctl00_ContentPlaceHolder1_PublicPagePlaceholder_PageUserControl_ctl00_UserControl0_LabelRevenueValue")
         .text;
-
-    setState(() => _isLoading = false);
+    return _solarDescription;
   }
 
   @override
@@ -65,76 +58,84 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
         text: "Daten der Solaranlage",
         withBackButton: true,
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: <Widget>[
-                Card(
-                  child: Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Column(
-                              children: <Widget>[
-                                Icon(Icons.calendar_today, size: 56),
-                                Text("Datum"),
-                                Padding(
-                                    padding: const EdgeInsets.only(top: 8.0)),
-                                Text(_solarDate)
-                              ],
-                            ),
-                            Column(
-                              children: <Widget>[
-                                Icon(Icons.lightbulb_outline, size: 56),
-                                Text("Energie"),
-                                Padding(
-                                    padding: const EdgeInsets.only(top: 8.0)),
-                                Text(_solarEnergy)
-                              ],
-                            ),
-                          ],
+      body: FutureBuilder(
+        future: _getSolarPanelData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData)
+            return RefreshIndicator(
+              onRefresh: () => _getSolarPanelData(),
+              child: ListView(
+                padding: const EdgeInsets.all(16.0),
+                children: <Widget>[
+                  Card(
+                    child: Column(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Column(
+                                children: <Widget>[
+                                  Icon(Icons.calendar_today, size: 56),
+                                  Text("Datum"),
+                                  Padding(
+                                      padding: const EdgeInsets.only(top: 8.0)),
+                                  Text(_solarDate)
+                                ],
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Icon(Icons.lightbulb_outline, size: 56),
+                                  Text("Energie"),
+                                  Padding(
+                                      padding: const EdgeInsets.only(top: 8.0)),
+                                  Text(_solarEnergy)
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 32.0, right: 32.0, bottom: 32.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Column(
-                              children: <Widget>[
-                                Icon(Icons.landscape, size: 56),
-                                Text("Vermiedenes CO2"),
-                                Padding(
-                                    padding: const EdgeInsets.only(top: 8.0)),
-                                Text(_solarAvoidedCarbonDioxide)
-                              ],
-                            ),
-                            Column(
-                              children: <Widget>[
-                                Icon(Icons.monetization_on, size: 56),
-                                Text("Vergütung"),
-                                Padding(
-                                    padding: const EdgeInsets.only(top: 8.0)),
-                                Text(_solarRevenue + "€")
-                              ],
-                            )
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 32.0, right: 32.0, bottom: 32.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Column(
+                                children: <Widget>[
+                                  Icon(Icons.landscape, size: 56),
+                                  Text("Vermiedenes CO2"),
+                                  Padding(
+                                      padding: const EdgeInsets.only(top: 8.0)),
+                                  Text(_solarAvoidedCarbonDioxide)
+                                ],
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Icon(Icons.monetization_on, size: 56),
+                                  Text("Vergütung"),
+                                  Padding(
+                                      padding: const EdgeInsets.only(top: 8.0)),
+                                  Text(_solarRevenue + "€")
+                                ],
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 32.0),
-                  child: Text(_solarDescription.join("\n\n")),
-                )
-              ],
-            ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 32.0),
+                    child: Text(snapshot.data.join("\n\n")),
+                  )
+                ],
+              ),
+            );
+          return Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 }

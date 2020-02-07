@@ -1,9 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class VertretungsplanPage extends StatefulWidget {
   @override
@@ -23,12 +25,16 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
   List<String> _allClasses = [];
   String _input;
   String _lastChanged = "";
-  String _selectedClass;
+  String _substitutionFilter;
   final String _password = "@Vertretung2019";
   String untisWeek = "";
   TabController _tabController;
-  final TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _teacherNameController = TextEditingController();
   Future _getSubstitutionPlan;
+  int _welcomePage = 0;
+  SharedPreferences _prefs;
+  bool _teacherSelected;
 
   @override
   void initState() {
@@ -38,26 +44,29 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
   }
 
   Future _checkLogin() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _isLoggedIn = (_prefs.getBool('isLoggedIn') ?? false);
+    _prefs = await SharedPreferences.getInstance();
+    _isLoggedIn = (_prefs.getBool('isLoggedIn') ?? false) &&
+        _prefs.getString('substitutionFilter') != null;
     await _prefs.setBool('isLoggedIn', _isLoggedIn);
   }
 
   Future _logIn() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    _prefs = await SharedPreferences.getInstance();
     await _prefs.setBool('isLoggedIn', true);
     setState(() => _isLoggedIn = (_prefs.getBool('isLoggedIn') ?? false));
   }
 
-  Future _filterForClass() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _selectedClass = (_prefs.getString('selectedClass'));
-    await _prefs.setString('selectedClass', _selectedClass);
+  Future _getSubstitutionFilter() async {
+    _prefs = await SharedPreferences.getInstance();
+    _teacherSelected = _prefs.getBool('teacherSelected');
+    _substitutionFilter =
+        _prefs.getString('substitutionFilter') ?? "Alle Klassen anzeigen";
+    _prefs.setString('substitutionFilter', _substitutionFilter);
   }
 
-  Future _setFilteredClass() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    await _prefs.setString('selectedClass', _selectedClass);
+  Future _setSubstitutionFilter() async {
+    _prefs = await SharedPreferences.getInstance();
+    await _prefs.setString('substitutionFilter', _substitutionFilter);
   }
 
   Future _getNavbar() async {
@@ -118,13 +127,15 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
   Future _getSubstitutionPlanInit() async {
     await _checkLogin();
     await _getNavbar();
-    await _filterForClass();
+    await _getSubstitutionFilter();
     await _getTables();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    double _displayHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: _isLoggedIn
           ? TabBar(
@@ -152,389 +163,566 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
       body: FutureBuilder(
         future: _getSubstitutionPlan,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done && !_isLoggedIn)
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    controller: _textEditingController,
-                    textAlign: TextAlign.center,
-                    obscureText: true,
-                    onChanged: (input) => setState(() => _input = input),
-                    onSubmitted: (input) => input == _password
-                        ? _logIn()
-                        : setState(() {
-                            _wrongPassword = true;
-                            _textEditingController.clear();
-                          }),
-                    decoration: InputDecoration(
-                        hintText: 'Passwort eingeben',
-                        contentPadding: const EdgeInsets.all(16.0),
-                        errorText: _wrongPassword
-                            ? "Falsches Passwort eingegeben"
-                            : null,
-                        border: OutlineInputBorder()),
+          if (snapshot.connectionState == ConnectionState.done &&
+              !_isLoggedIn &&
+              _welcomePage == 0)
+            return Scaffold(
+              floatingActionButton: FloatingActionButton(
+                child: Icon(Icons.arrow_forward),
+                onPressed: () => setState(() => _welcomePage = 1),
+              ),
+              body: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Image.asset(
+                        "assets/applogo.png",
+                        height: _displayHeight * 0.2,
+                      ),
+                    ),
+                    Text(
+                      "Willkommen beim Vertretungsplan\n",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: _displayHeight * 0.05,
+                      ),
+                    ),
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(fontSize: _displayHeight * 0.02, color: Theme.of(context).textTheme.body1.color),
+                        text:
+                            "Um sich anzumelden, wird das Passwort benötigt, das auch für den Vertretungsplan auf der Internetseite der Engelsburg verwendet wird. Es steht derzeit auch auf Werbezetteln, die an der ganzen Schule an den Eingangstüren hängen. Falls Sie es nicht finden können, sprechen Sie mich in der Schule an oder schreiben Sie mir eine E-Mail mit Nachweis als Schüler/Lehrer an ",
+                        children: <TextSpan>[
+                          TextSpan(
+                              text: "dariotrombello@gmail.com",
+                              style: TextStyle(color: Colors.blue),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  url_launcher.launch(
+                                      "mailto:dariotrombello@gmail.com");
+                                }),
+                          TextSpan(text: ".")
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+
+          if (snapshot.connectionState == ConnectionState.done &&
+              !_isLoggedIn &&
+              _welcomePage == 1)
+            return Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: Card(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(4.0),
+                        onTap: () {
+                          setState(() {
+                            _teacherSelected = true;
+                            _prefs.setBool('teacherSelected', _teacherSelected);
+                            _welcomePage = 2;
+                          });
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.person,
+                              size: _displayHeight * 0.1,
+                            ),
+                            Text(
+                              "Lehrer",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: _displayHeight * 0.04),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Card(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(4.0),
+                        onTap: () {
+                          setState(() {
+                            _teacherSelected = false;
+                            _prefs.setBool('teacherSelected', _teacherSelected);
+                            _welcomePage = 2;
+                          });
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.school,
+                              size: _displayHeight * 0.1,
+                            ),
+                            Text(
+                              "Schüler",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: _displayHeight * 0.04),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+
+          if (snapshot.connectionState == ConnectionState.done &&
+              !_isLoggedIn &&
+              _welcomePage == 2)
+            return Center(
+              child: Card(
+                margin: EdgeInsets.all(16.0),
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: _passwordController,
+                        textAlign: TextAlign.center,
+                        obscureText: true,
+                        onChanged: (input) => setState(() => _input = input),
+                        onSubmitted: (input) => input == _password
+                            ? _logIn()
+                            : setState(() {
+                                _wrongPassword = true;
+                                _passwordController.clear();
+                              }),
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.lock),
+                            hintText: 'Passwort eingeben',
+                            errorText: _wrongPassword
+                                ? "Falsches Passwort eingegeben"
+                                : null,
+                            border: const OutlineInputBorder()),
+                      ),
+                      Padding(padding: EdgeInsets.only(top: 16.0)),
+                      _teacherSelected
+                          ? SizedBox(
+                              width: 150,
+                              child: TextField(
+                                textAlign: TextAlign.center,
+                                decoration: const InputDecoration(
+                                    hintText: 'Lehrerkürzel',
+                                    border: const OutlineInputBorder()),
+                                controller: _teacherNameController,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _substitutionFilter = value;
+                                    _setSubstitutionFilter();
+                                  });
+                                },
+                              ),
+                            )
+                          : Container(
+                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                              decoration: ShapeDecoration(
+                                  shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          width: 1.0, color: Colors.white38),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(4.0)))),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  hint: const Text("Nach Klasse filtern"),
+                                  value:
+                                      _allClasses.contains(_substitutionFilter)
+                                          ? _substitutionFilter
+                                          : _allClasses[0],
+                                  items: _allClasses
+                                      .map((String item) =>
+                                          DropdownMenuItem<String>(
+                                              value: item, child: Text(item)))
+                                      .toList(),
+                                  onChanged: (value) => setState(() {
+                                    _substitutionFilter = value;
+                                    _setSubstitutionFilter();
+                                  }),
+                                ),
+                              ),
+                            ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 32.0),
+                      ),
+                      SizedBox(
+                        height: 60,
+                        width: MediaQuery.of(context).size.width,
+                        child: RaisedButton(
+                          child: Text("EINLOGGEN"),
+                          onPressed: () => _input == _password
+                              ? _logIn()
+                              : setState(() {
+                                  _wrongPassword = true;
+                                  _passwordController.clear();
+                                }),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                ),
-                RaisedButton(
-                    child: Text("Einloggen"),
-                    onPressed: () => _input == _password
-                        ? _logIn()
-                        : setState(() {
-                            _wrongPassword = true;
-                            _textEditingController.clear();
-                          })),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                ),
-                DropdownButton<String>(
-                  hint: Text("Nach Klasse filtern"),
-                  value: _selectedClass,
-                  items: _allClasses
-                      .map((String item) => DropdownMenuItem<String>(
-                          value: item, child: Text(item)))
-                      .toList(),
-                  onChanged: (_value) => setState(() {
-                    _selectedClass = _value;
-                    _setFilteredClass();
-                  }),
-                ),
-              ],
+              ),
             );
 
           if (snapshot.connectionState == ConnectionState.done && _isLoggedIn)
             return TabBarView(
               controller: _tabController,
               children: [
-                ListView.builder(
-                  itemCount: _substitutionDays.length,
-                  itemBuilder: (context, index) {
-                    final List<dom.Element> _currentColumns =
-                        _substitutionDays[index]
-                            .querySelectorAll("tr.list")
-                            .sublist(1);
-                    final List<String> _classes = [];
-                    final List<String> _hours = [];
-                    final List<String> _rooms = [];
-                    final List<String> _subjects = [];
-                    final List<String> _substitutionInformation = [];
-                    final List<String> _substitutionSpan = [];
-                    final List<String> _substitutionTeachers = [];
-                    final List<String> _substitutionTypes = [];
-                    final List<String> _teachers = [];
+                RefreshIndicator(
+                  onRefresh: () => _getSubstitutionPlan,
+                  child: ListView.builder(
+                    itemCount: _substitutionDays.length,
+                    itemBuilder: (context, index) {
+                      final List<dom.Element> _currentColumns =
+                          _substitutionDays[index]
+                              .querySelectorAll("tr.list")
+                              .sublist(1);
+                      final List<String> _classes = [];
+                      final List<String> _hours = [];
+                      final List<String> _rooms = [];
+                      final List<String> _subjects = [];
+                      final List<String> _substitutionInformation = [];
+                      final List<String> _substitutionSpan = [];
+                      final List<String> _substitutionTeachers = [];
+                      final List<String> _substitutionTypes = [];
+                      final List<String> _teachers = [];
 
-                    for (int i = 0; i < _currentColumns.length; i++) {
-                      final List<dom.Element> _currentRow =
-                          _currentColumns[i].querySelectorAll("td");
-                      if (_currentRow[1].text.trim().isEmpty &&
-                          _currentRow[8].text.trim().isNotEmpty) {
-                        int lastSubstitution = _classes
-                            .lastIndexWhere((_class) => _class.isNotEmpty);
-                        _substitutionInformation[lastSubstitution] =
-                            _substitutionInformation[lastSubstitution] +
-                                " " +
-                                _currentRow[8].text.trim();
-                      } else {
-                        _classes.add(_currentRow[0].text.trim());
-                        _hours.add(_currentRow[1].text.trim());
-                        _subjects.add(_currentRow[2].text.trim());
-                        _substitutionTeachers.add(
-                            _currentRow[3].text.trim().replaceAll("+", ""));
-                        _teachers.add(_currentRow[4].text.trim());
-                        _substitutionTypes.add(_currentRow[5].text.trim());
-                        _substitutionSpan.add(_currentRow[6].text.trim());
-                        _rooms.add(
-                            _currentRow[7].text.trim().replaceAll("---", ""));
-                        _substitutionInformation
-                            .add(_currentRow[8].text.trim());
+                      for (int i = 0; i < _currentColumns.length; i++) {
+                        final List<dom.Element> _currentRow =
+                            _currentColumns[i].querySelectorAll("td");
+                        if (_currentRow[1].text.trim().isEmpty &&
+                            _currentRow[8].text.trim().isNotEmpty) {
+                          int lastSubstitution = _classes
+                              .lastIndexWhere((_class) => _class.isNotEmpty);
+                          _substitutionInformation[lastSubstitution] =
+                              _substitutionInformation[lastSubstitution] +
+                                  " " +
+                                  _currentRow[8].text.trim();
+                        } else {
+                          _classes.add(_currentRow[0].text.trim());
+                          _hours.add(_currentRow[1].text.trim());
+                          _subjects.add(_currentRow[2].text.trim());
+                          _substitutionTeachers.add(
+                              _currentRow[3].text.trim().replaceAll("+", ""));
+                          _teachers.add(_currentRow[4].text.trim());
+                          _substitutionTypes.add(_currentRow[5].text.trim());
+                          _substitutionSpan.add(_currentRow[6].text.trim());
+                          _rooms.add(
+                              _currentRow[7].text.trim().replaceAll("---", ""));
+                          _substitutionInformation
+                              .add(_currentRow[8].text.trim());
+                        }
                       }
-                    }
-                    if (!_classes.contains(_selectedClass) &&
-                        _selectedClass != "Alle Klassen anzeigen" &&
-                        _selectedClass != null) {
-                      _noSubstitutionsAvailable = true;
-                    } else {
-                      _noSubstitutionsAvailable = false;
-                    }
+                      if (!_teacherSelected &&
+                          !_classes.contains(_substitutionFilter) &&
+                          _substitutionFilter != "Alle Klassen anzeigen") {
+                        _noSubstitutionsAvailable = true;
+                      } else if (_teacherSelected &&
+                              !_teachers.contains(_substitutionFilter) ||
+                          _teacherSelected &&
+                              _substitutionTeachers
+                                  .contains(_substitutionFilter)) {
+                        _noSubstitutionsAvailable = true;
+                      } else {
+                        _noSubstitutionsAvailable = false;
+                      }
 
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 8.0, right: 8.0, top: 12.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              _dayList[index],
-                              style: TextStyle(fontSize: 20),
+                      return Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 8.0, right: 8.0, top: 12.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                _dayList[index],
+                                style: const TextStyle(fontSize: 20),
+                              ),
                             ),
                           ),
-                        ),
-                        _noSubstitutionsAvailable
-                            ? SizedBox(
-                                width: double.maxFinite,
-                                child: Card(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(18.0),
-                                    child: Center(
-                                      child: Text(
-                                        "Keine Vertretungen für diesen Tag",
-                                        style: TextStyle(fontSize: 16),
+                          _noSubstitutionsAvailable
+                              ? SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  child: Card(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(18.0),
+                                      child: Center(
+                                        child: Text(
+                                          "Keine Vertretungen für diesen Tag",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              )
-                            : ListView.builder(
-                                shrinkWrap: true,
-                                physics: ClampingScrollPhysics(),
-                                itemCount: _classes.length,
-                                itemBuilder: (context, index2) {
-                                  bool _hideElement = false;
-                                  if (_selectedClass == null ||
-                                      _selectedClass ==
-                                          "Alle Klassen anzeigen") {
-                                    _hideElement = false;
-                                  } else if (
-                                      // Gibt es einen besseren Weg, von Untis zusammengesetzte
-                                      // Klassen wie 7abcd8abc wieder zu trennen?
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: _classes.length,
+                                  itemBuilder: (context, index2) {
+                                    bool _hideElement = false;
+                                    if (_substitutionFilter ==
+                                        "Alle Klassen anzeigen") {
+                                      _hideElement = false;
+                                    } else if (
+                                        // Gibt es einen besseren Weg, von Untis zusammengesetzte
+                                        // Klassen wie 7abcd8abc wieder zu trennen?
+                                        _classes[index2]
+                                                .startsWith(RegExp(r'^\d+')) &&
+                                            _substitutionFilter
+                                                .startsWith(RegExp(r'^\d+')) &&
+                                            _classes[index2].substring(
+                                                    _classes[index2].indexOf(
+                                                        RegExp(r'^\d+')),
+                                                    _classes[index2].lastIndexOf(
+                                                            RegExp(r'^\d+')) +
+                                                        1) ==
+                                                _substitutionFilter.substring(
+                                                    _substitutionFilter.indexOf(
+                                                        RegExp(r'^\d+')),
+                                                    _substitutionFilter
+                                                            .lastIndexOf(RegExp(
+                                                                r'^\d+')) +
+                                                        1)) {
                                       _classes[index2]
-                                              .startsWith(RegExp(r'^\d+')) &&
-                                          _selectedClass
-                                              .startsWith(RegExp(r'^\d+')) &&
-                                          _classes[index2].substring(
-                                                  _classes[index2]
-                                                      .indexOf(RegExp(r'^\d+')),
-                                                  _classes[index2].lastIndexOf(
-                                                          RegExp(r'^\d+')) +
-                                                      1) ==
-                                              _selectedClass.substring(
-                                                  _selectedClass
-                                                      .indexOf(RegExp(r'^\d+')),
-                                                  _selectedClass.lastIndexOf(
-                                                          RegExp(r'^\d+')) +
-                                                      1)) {
-                                    _classes[index2]
-                                            .substring(_classes[index2]
-                                                .indexOf(RegExp('[a-zA-Z]')))
-                                            .contains(_selectedClass.substring(
-                                              _selectedClass
-                                                  .indexOf(RegExp('[a-zA-Z]')),
-                                            ))
-                                        ? _hideElement = false
-                                        : _hideElement = true;
-                                  } else if (_classes[index2] ==
-                                      _selectedClass) {
-                                    _hideElement = false;
-                                  } else {
-                                    _hideElement = true;
-                                  }
-
-                                  MaterialColor _substitutionTypeColor() {
-                                    switch (_substitutionTypes[index2]) {
-                                      case "Betreuung":
-                                        return Colors.teal;
-                                      case "eigenv. Arb.":
-                                        return Colors.purple;
-                                      case "Entfall":
-                                        return Colors.red;
-                                      case "Raum-Vtr.":
-                                        return Colors.green;
-                                      default:
-                                        return Colors.blue;
+                                              .substring(_classes[index2]
+                                                  .indexOf(RegExp('[a-zA-Z]')))
+                                              .contains(
+                                                  _substitutionFilter.substring(
+                                                _substitutionFilter.indexOf(
+                                                    RegExp('[a-zA-Z]')),
+                                              ))
+                                          ? _hideElement = false
+                                          : _hideElement = true;
+                                    } else if (!_teacherSelected &&
+                                            _classes[index2] ==
+                                                _substitutionFilter ||
+                                        _teacherSelected &&
+                                            _teachers[index2] ==
+                                                _substitutionFilter ||
+                                        _teacherSelected &&
+                                            _substitutionTeachers[index2] ==
+                                                _substitutionFilter) {
+                                      _hideElement = false;
+                                    } else {
+                                      _hideElement = true;
                                     }
-                                  }
 
-                                  return Column(
-                                    children: <Widget>[
-                                      _hideElement
-                                          ? Container()
-                                          : Card(
-                                              color: _substitutionTypeColor(),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(6.0),
-                                                child: Column(
-                                                  children: [
-                                                    ListTile(
-                                                        leading: Text(
-                                                          _hours[index2],
-                                                          style: TextStyle(
-                                                            fontSize: 28,
+                                    MaterialColor _substitutionTypeColor() {
+                                      switch (_substitutionTypes[index2]) {
+                                        case "Betreuung":
+                                          return Colors.indigo;
+                                        case "eigenv. Arb.":
+                                          return Colors.purple;
+                                        case "Entfall":
+                                          return Colors.red;
+                                        case "Raum-Vtr.":
+                                          return Colors.green;
+                                        default:
+                                          return Colors.blue;
+                                      }
+                                    }
+
+                                    return Column(
+                                      children: <Widget>[
+                                        _hideElement
+                                            ? Container()
+                                            : Card(
+                                                color: _substitutionTypeColor(),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(6.0),
+                                                  child: Column(
+                                                    children: [
+                                                      ListTile(
+                                                          leading: Text(
+                                                            _hours[index2],
+                                                            style: TextStyle(
+                                                                fontSize: 28.0,
+                                                                color: Colors
+                                                                    .white),
                                                           ),
-                                                        ),
-                                                        title: Text(
+                                                          title: Text(
                                                             _substitutionTypes[
-                                                                index2]),
-                                                        subtitle: Wrap(
-                                                          children: <Widget>[
-                                                            Text(_classes[
-                                                                index2]),
-                                                            Text(_subjects[
-                                                                        index2] ==
-                                                                    ""
-                                                                ? ""
-                                                                : " – "),
-                                                            Text(_subjects[
-                                                                index2]),
-                                                            Text(_substitutionTeachers[
-                                                                        index2] ==
-                                                                    ""
-                                                                ? ""
-                                                                : " (${_substitutionTeachers[index2]}"),
-                                                            Text(_substitutionTeachers[
-                                                                            index2] !=
-                                                                        "" &&
-                                                                    _teachers[
-                                                                            index2] ==
-                                                                        ""
-                                                                ? ")"
-                                                                : ""),
-                                                            Text(_substitutionTeachers[
-                                                                            index2] !=
-                                                                        "" &&
-                                                                    _teachers[
-                                                                            index2] !=
-                                                                        "" &&
-                                                                    _substitutionTeachers[
-                                                                            index2] !=
-                                                                        _teachers[
-                                                                            index2]
-                                                                ? " statt "
-                                                                : ""),
-                                                            Text(_substitutionTeachers[
-                                                                            index2] ==
-                                                                        "" &&
-                                                                    _teachers[
-                                                                            index2] !=
-                                                                        ""
-                                                                ? " ("
-                                                                : ""),
-                                                            Text(
-                                                                _teachers[index2] ==
-                                                                        _substitutionTeachers[
-                                                                            index2]
-                                                                    ? ""
-                                                                    : _teachers[
-                                                                        index2],
-                                                                style:
-                                                                    TextStyle(
-                                                                  decoration:
-                                                                      TextDecoration
-                                                                          .lineThrough,
-                                                                )),
-                                                            Text(_teachers[
-                                                                        index2] !=
-                                                                    ""
-                                                                ? ")"
-                                                                : ""),
-                                                            Text(_rooms[index2] ==
-                                                                    ""
-                                                                ? ""
-                                                                : " in " +
-                                                                    _rooms[
-                                                                        index2]),
-                                                            Text(_substitutionInformation[
-                                                                        index2] ==
-                                                                    ""
-                                                                ? ""
-                                                                : " – ${_substitutionInformation[index2]}"),
-                                                            Text(_substitutionSpan[
-                                                                        index2] ==
-                                                                    ""
-                                                                ? ""
-                                                                : " – ${_substitutionSpan[index2]}")
-                                                          ],
-                                                        )),
-                                                  ],
+                                                                index2],
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                          ),
+                                                          subtitle: Wrap(
+                                                            children: <Widget>[
+                                                              RichText(
+                                                                text: TextSpan(
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white70),
+                                                                  text: _classes[
+                                                                      index2],
+                                                                  children: <
+                                                                      TextSpan>[
+                                                                    TextSpan(
+                                                                        text: _subjects[index2] ==
+                                                                                ""
+                                                                            ? ""
+                                                                            : " – "),
+                                                                    TextSpan(
+                                                                        text: _subjects[
+                                                                            index2]),
+                                                                    TextSpan(
+                                                                        text: _substitutionTeachers[index2] ==
+                                                                                ""
+                                                                            ? ""
+                                                                            : " (${_substitutionTeachers[index2]}"),
+                                                                    TextSpan(
+                                                                        text: _substitutionTeachers[index2] != "" &&
+                                                                                _teachers[index2] == ""
+                                                                            ? ")"
+                                                                            : ""),
+                                                                    TextSpan(
+                                                                        text: _substitutionTeachers[index2] != "" &&
+                                                                                _teachers[index2] != "" &&
+                                                                                _substitutionTeachers[index2] != _teachers[index2]
+                                                                            ? " statt "
+                                                                            : ""),
+                                                                    TextSpan(
+                                                                        text: _substitutionTeachers[index2] == "" &&
+                                                                                _teachers[index2] != ""
+                                                                            ? " ("
+                                                                            : ""),
+                                                                    TextSpan(
+                                                                        text: _teachers[index2] == _substitutionTeachers[index2]
+                                                                            ? ""
+                                                                            : _teachers[
+                                                                                index2],
+                                                                        style:
+                                                                            TextStyle(
+                                                                          decoration:
+                                                                              TextDecoration.lineThrough,
+                                                                        )),
+                                                                    TextSpan(
+                                                                        text: _teachers[index2] !=
+                                                                                ""
+                                                                            ? ")"
+                                                                            : ""),
+                                                                    TextSpan(
+                                                                        text: _rooms[index2] ==
+                                                                                ""
+                                                                            ? ""
+                                                                            : " in " +
+                                                                                _rooms[index2]),
+                                                                    TextSpan(
+                                                                        text: _substitutionInformation[index2] ==
+                                                                                ""
+                                                                            ? ""
+                                                                            : " – ${_substitutionInformation[index2]}"),
+                                                                    TextSpan(
+                                                                        text: _substitutionSpan[index2] ==
+                                                                                ""
+                                                                            ? ""
+                                                                            : " – ${_substitutionSpan[index2]}")
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          )),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                      _substitutionDays[_substitutionDays
-                                                      .indexOf(_substitutionDays
-                                                          .last)] ==
-                                                  _substitutionDays[index] &&
-                                              index2 + 1 ==
-                                                  _currentColumns.length
-                                          ? Padding(
-                                              padding:
-                                                  const EdgeInsets.all(6.0),
-                                              child: Text(_lastChanged))
-                                          : Container()
-                                    ],
-                                  );
-                                },
-                              ),
-                      ],
-                    );
-                  },
+                                        _substitutionDays.last ==
+                                                    _substitutionDays[index] &&
+                                                index2 + 1 == _classes.length
+                                            ? Padding(
+                                                padding:
+                                                    const EdgeInsets.all(6.0),
+                                                child: Text(_lastChanged))
+                                            : Container()
+                                      ],
+                                    );
+                                  },
+                                ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
-                ListView.builder(
-                  itemCount: _substitutionDays.length,
-                  itemBuilder: (context, index) {
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 8.0, right: 8.0, top: 12.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              _dayList[index],
-                              style: TextStyle(fontSize: 20),
+                RefreshIndicator(
+                  onRefresh: () => _getSubstitutionPlan,
+                  child: ListView.builder(
+                    itemCount: _substitutionDays.length,
+                    itemBuilder: (context, index) {
+                      return Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 8.0, right: 8.0, top: 12.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                _dayList[index],
+                                style: TextStyle(fontSize: 20),
+                              ),
                             ),
                           ),
-                        ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: ClampingScrollPhysics(),
-                          itemCount:
-                              _newsDays[index].querySelectorAll("tr").length -
-                                  1,
-                          itemBuilder: (context, index2) {
-                            List<String> _news = [];
-                            for (dom.Element _newsDay in _newsDays[index]
-                                .querySelectorAll("tr")
-                                .sublist(1)) {
-                              _news.add(_newsDay.text);
-                            }
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: <Widget>[
-                                Card(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Text(
-                                      _news[index2],
-                                      style: TextStyle(fontSize: 18),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount:
+                                _newsDays[index].querySelectorAll("tr").length -
+                                    1,
+                            itemBuilder: (context, index2) {
+                              List<String> _news = [];
+                              for (dom.Element _newsDay in _newsDays[index]
+                                  .querySelectorAll("tr")
+                                  .sublist(1)) {
+                                _news.add(_newsDay.text);
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: <Widget>[
+                                  Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Text(
+                                        _news[index2],
+                                        style: TextStyle(fontSize: 18),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                _newsDays[_newsDays.indexOf(_newsDays.last)] ==
-                                            _newsDays[index] &&
-                                        index2 + 1 ==
-                                            _newsDays[index]
-                                                    .querySelectorAll("tr")
-                                                    .length -
-                                                1
-                                    ? Center(
-                                        child: Padding(
-                                            padding: const EdgeInsets.all(6.0),
-                                            child: Text(_lastChanged)))
-                                    : Container()
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    );
-                  },
+                                  _newsDays.last == _newsDays[index] &&
+                                          index2 + 1 ==
+                                              _newsDays[index]
+                                                      .querySelectorAll("tr")
+                                                      .length -
+                                                  1
+                                      ? Center(
+                                          child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(6.0),
+                                              child: Text(_lastChanged)))
+                                      : Container()
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ],
             );
