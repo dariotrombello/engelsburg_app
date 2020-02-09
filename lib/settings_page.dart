@@ -51,7 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: EngelsburgAppBar(text: "Einstellungen", withBackButton: true),
+      appBar: EngelsburgAppBar(title: "Einstellungen", withBackButton: true),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: FutureBuilder(

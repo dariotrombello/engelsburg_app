@@ -26,7 +26,6 @@ class EngelsburgApp extends StatefulWidget {
 
 class _EngelsburgAppState extends State<EngelsburgApp> {
   final PageController _pageController = PageController();
-
   int _currentIndex = 0;
 
   @override
@@ -40,7 +39,6 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
           SchuelerzeitungPage(),
           VertretungsplanPage()
         ],
-        physics: NeverScrollableScrollPhysics(),
       ),
       drawer: Drawer(
         child: ListView(
@@ -106,7 +104,7 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
         ),
       ),
       appBar: EngelsburgAppBar(
-        text: "Engelsburg-App",
+        title: "Engelsburg-App",
         withBackButton: false,
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -171,62 +169,61 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
 }
 
 class EngelsburgAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
   final bool withBackButton;
-  final String text;
 
-  const EngelsburgAppBar(
-      {Key key, @required this.text, @required this.withBackButton})
+  EngelsburgAppBar({Key key, this.title, this.withBackButton})
       : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Card(
           child: Column(
             children: [
-              Container(
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      withBackButton
-                          ? IconButton(
-                              icon: Icon(Icons.arrow_back),
-                              onPressed: () => Navigator.of(context).pop(),
-                            )
-                          : IconButton(
-                              icon: Icon(Icons.menu),
-                              onPressed: () {
-                                Scaffold.of(context).openDrawer();
-                              },
-                            ),
-                      Expanded(
-                        child: Text(
-                          text,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600, fontSize: 16.0),
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                          maxLines: 1,
-                        ),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    withBackButton ?? false
+                        ? IconButton(
+                            icon: Icon(Icons.arrow_back),
+                            onPressed: () => Navigator.of(context).pop(),
+                          )
+                        : IconButton(
+                            icon: Icon(Icons.menu),
+                            onPressed: () {
+                              Scaffold.of(context).openDrawer();
+                            },
+                          ),
+                    Expanded(
+                      child: Text(
+                        title ?? "Engelsburg-App",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 16.0),
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                        maxLines: 1,
                       ),
-                      Visibility(
-                        visible: !withBackButton,
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
-                        child: IconButton(
-                          icon: Icon(Icons.info_outline),
-                          onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => AboutPage())),
-                        ),
+                    ),
+                    Visibility(
+                      visible: !withBackButton ?? true,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
+                      child: IconButton(
+                        icon: Icon(Icons.info_outline),
+                        onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => AboutPage())),
                       ),
-                    ]),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

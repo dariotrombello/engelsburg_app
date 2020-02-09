@@ -24,7 +24,7 @@ class TerminePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: EngelsburgAppBar(
-        text: 'Termine',
+        title: 'Termine',
         withBackButton: true,
       ),
       body: FutureBuilder(

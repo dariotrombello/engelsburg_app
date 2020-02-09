@@ -41,7 +41,7 @@ class AGListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: EngelsburgAppBar(
-        text: "AGs",
+        title: "AGs",
         withBackButton: true,
       ),
       body: FutureBuilder(

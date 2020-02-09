@@ -39,7 +39,7 @@ class _AboutPageState extends State<AboutPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: EngelsburgAppBar(
-        text: "Über",
+        title: "Über",
         withBackButton: true,
       ),
       body: ListView(

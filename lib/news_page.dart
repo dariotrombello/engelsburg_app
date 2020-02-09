@@ -158,7 +158,7 @@ class NewsPageIndepth extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: EngelsburgAppBar(
-        text: "News",
+        title: "News",
         withBackButton: true,
       ),
       body: ListView(

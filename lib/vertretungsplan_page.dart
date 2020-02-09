@@ -191,7 +191,9 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                     ),
                     RichText(
                       text: TextSpan(
-                        style: TextStyle(fontSize: _displayHeight * 0.02, color: Theme.of(context).textTheme.body1.color),
+                        style: TextStyle(
+                            fontSize: _displayHeight * 0.02,
+                            color: Theme.of(context).textTheme.body1.color),
                         text:
                             "Um sich anzumelden, wird das Passwort benötigt, das auch für den Vertretungsplan auf der Internetseite der Engelsburg verwendet wird. Es steht derzeit auch auf Werbezetteln, die an der ganzen Schule an den Eingangstüren hängen. Falls Sie es nicht finden können, sprechen Sie mich in der Schule an oder schreiben Sie mir eine E-Mail mit Nachweis als Schüler/Lehrer an ",
                         children: <TextSpan>[
@@ -575,32 +577,30 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                                                   children: <
                                                                       TextSpan>[
                                                                     TextSpan(
-                                                                        text: _subjects[index2] ==
-                                                                                ""
+                                                                        text: _subjects[index2].isEmpty
                                                                             ? ""
                                                                             : " – "),
                                                                     TextSpan(
                                                                         text: _subjects[
                                                                             index2]),
                                                                     TextSpan(
-                                                                        text: _substitutionTeachers[index2] ==
-                                                                                ""
+                                                                        text: _substitutionTeachers[index2].isEmpty
                                                                             ? ""
                                                                             : " (${_substitutionTeachers[index2]}"),
                                                                     TextSpan(
-                                                                        text: _substitutionTeachers[index2] != "" &&
-                                                                                _teachers[index2] == ""
+                                                                        text: _substitutionTeachers[index2].isNotEmpty &&
+                                                                                _teachers[index2].isEmpty
                                                                             ? ")"
                                                                             : ""),
                                                                     TextSpan(
-                                                                        text: _substitutionTeachers[index2] != "" &&
-                                                                                _teachers[index2] != "" &&
+                                                                        text: _substitutionTeachers[index2].isNotEmpty &&
+                                                                                _teachers[index2].isNotEmpty &&
                                                                                 _substitutionTeachers[index2] != _teachers[index2]
                                                                             ? " statt "
                                                                             : ""),
                                                                     TextSpan(
-                                                                        text: _substitutionTeachers[index2] == "" &&
-                                                                                _teachers[index2] != ""
+                                                                        text: _substitutionTeachers[index2].isEmpty &&
+                                                                                _teachers[index2].isNotEmpty
                                                                             ? " ("
                                                                             : ""),
                                                                     TextSpan(
@@ -614,24 +614,20 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                                                               TextDecoration.lineThrough,
                                                                         )),
                                                                     TextSpan(
-                                                                        text: _teachers[index2] !=
-                                                                                ""
+                                                                        text: _teachers[index2].isNotEmpty
                                                                             ? ")"
                                                                             : ""),
                                                                     TextSpan(
-                                                                        text: _rooms[index2] ==
-                                                                                ""
+                                                                        text: _rooms[index2].isEmpty
                                                                             ? ""
                                                                             : " in " +
                                                                                 _rooms[index2]),
                                                                     TextSpan(
-                                                                        text: _substitutionInformation[index2] ==
-                                                                                ""
+                                                                        text: _substitutionInformation[index2].isEmpty
                                                                             ? ""
                                                                             : " – ${_substitutionInformation[index2]}"),
                                                                     TextSpan(
-                                                                        text: _substitutionSpan[index2] ==
-                                                                                ""
+                                                                        text: _substitutionSpan[index2].isEmpty
                                                                             ? ""
                                                                             : " – ${_substitutionSpan[index2]}")
                                                                   ],

@@ -57,7 +57,7 @@ class _CafeteriaPageState extends State<CafeteriaPage>
                         child: Text(snapshot.data[0],
                             style: TextStyle(fontWeight: FontWeight.w700)))),
                 ListView.builder(
-                  itemCount: snapshot.data.length,
+                  itemCount: snapshot.data.length - 1,
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
@@ -65,10 +65,13 @@ class _CafeteriaPageState extends State<CafeteriaPage>
                     // da das bereits angezeigt wird und join() verwenden,
                     // um unerwünschte Zeichen auszublenden und mit \n einen Absatz einzufügen.
                     return Card(
-                        child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(snapshot.data
-                                .sublist(1)[index > 0 ? index - 1 : 0])));
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text(
+                          snapshot.data.sublist(1)[index],
+                        ),
+                      ),
+                    );
                   },
                 ),
               ],

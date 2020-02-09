@@ -13,7 +13,7 @@ class SchoolInfoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: EngelsburgAppBar(
-        text: "Über die Schule",
+        title: "Über die Schule",
         withBackButton: true,
       ),
       body: ListView(

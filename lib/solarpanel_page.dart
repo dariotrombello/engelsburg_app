@@ -55,7 +55,7 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: EngelsburgAppBar(
-        text: "Daten der Solaranlage",
+        title: "Daten der Solaranlage",
         withBackButton: true,
       ),
       body: FutureBuilder(
