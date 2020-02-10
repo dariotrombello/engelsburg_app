@@ -27,11 +27,10 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
   String _lastChanged = "";
   String _substitutionFilter;
   final String _password = "@Vertretung2019";
-  String untisWeek = "";
   TabController _tabController;
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _teacherNameController = TextEditingController();
-  Future _getSubstitutionPlan;
+  Future _substitutionPlan;
   int _welcomePage = 0;
   SharedPreferences _prefs;
   bool _teacherSelected;
@@ -39,7 +38,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
   @override
   void initState() {
     super.initState();
-    _getSubstitutionPlan = _getSubstitutionPlanInit();
+    _substitutionPlan = _substitutionPlanInit();
     _tabController = TabController(length: 2, vsync: this);
   }
 
@@ -69,43 +68,31 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
     await _prefs.setString('substitutionFilter', _substitutionFilter);
   }
 
-  Future _getNavbar() async {
+  Future _getSubstitutionPlan() async {
+    List<String> untisWeeks = [];
     final SharedPreferences _prefs = await SharedPreferences.getInstance();
     final Response navbar = await Client().get(Uri.encodeFull(
         'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/frames/navbar.htm'));
-    final dom.Document document = parse(navbar.body);
-    final dom.Element navbarWeek =
-        document.querySelector("select.selectbox > option");
-    final String info = document.querySelector("span.description").text;
+    final dom.Document navbarDocument = parse(navbar.body);
+    final List<dom.Element> navbarWeeks =
+        navbarDocument.querySelectorAll("select.selectbox > option");
+    final String info = navbarDocument.querySelector("span.description").text;
     _lastChanged = info.substring(info.indexOf("Stand:")).trim();
 
-    untisWeek = navbarWeek.attributes["value"];
-    // Klassenliste aus dem Javascript-Element der Seite in eine List<String> konvertieren
-    _allClasses = navbar.body
-        .substring(
-            navbar.body.indexOf("var classes = ["), navbar.body.indexOf("];"))
-        .trim()
-        .replaceFirst("var classes = [", "")
-        .replaceFirst("];", "")
-        .replaceAll("\"", "")
-        .split(",");
-    _allClasses.insert(0, "Alle Klassen anzeigen");
-    _prefs.setStringList('allClasses', _allClasses);
-  }
-
-  Future _getTables() async {
-    _getNavbar().whenComplete(() async {
+    for (var i = 0; i < navbarWeeks.length; i++) {
+      untisWeeks.add(navbarWeeks[i].attributes["value"]);
       final Response substitutionTable = await Client().get(Uri.encodeFull(
           'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/' +
-              untisWeek +
+              untisWeeks[i] +
               '/w/w00000.htm'));
-      final dom.Document document = parse(substitutionTable.body);
+      final dom.Document substitutionTableDocument =
+          parse(substitutionTable.body);
       final List<dom.Element> _allSubstitutionDays =
-          document.querySelectorAll("table.subst > tbody");
-      final List<dom.Element> _allTables = document.querySelectorAll("table");
-      final List<dom.Element> days =
-          document.querySelectorAll("#vertretung > p > b, #vertretung > b");
-
+          substitutionTableDocument.querySelectorAll("table.subst > tbody");
+      final List<dom.Element> _allTables =
+          substitutionTableDocument.querySelectorAll("table");
+      final List<dom.Element> days = substitutionTableDocument
+          .querySelectorAll("#vertretung > p > b, #vertretung > b");
       for (int i = 0; i < _allSubstitutionDays.length; i++) {
         if (_allSubstitutionDays[i].querySelector("tr.list > td") != null &&
             _allSubstitutionDays[i].querySelector("tr.list > td").text !=
@@ -120,15 +107,26 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
           _newsDays.add(_allTables[i].querySelector("tbody"));
         }
       }
-      setState(() {});
-    });
+    }
+
+    // Klassenliste aus dem Javascript-Element der Seite in eine List<String> konvertieren
+    _allClasses = navbar.body
+        .substring(
+            navbar.body.indexOf("var classes = ["), navbar.body.indexOf("];"))
+        .trim()
+        .replaceFirst("var classes = [", "")
+        .replaceFirst("];", "")
+        .replaceAll("\"", "")
+        .split(",");
+    _allClasses.insert(0, "Alle Klassen anzeigen");
+    _prefs.setStringList('allClasses', _allClasses);
+    setState(() {});
   }
 
-  Future _getSubstitutionPlanInit() async {
+  Future _substitutionPlanInit() async {
     await _checkLogin();
-    await _getNavbar();
     await _getSubstitutionFilter();
-    await _getTables();
+    await _getSubstitutionPlan();
   }
 
   @override
@@ -161,7 +159,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
             )
           : null,
       body: FutureBuilder(
-        future: _getSubstitutionPlan,
+        future: _substitutionPlan,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               !_isLoggedIn &&
@@ -383,9 +381,9 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
           if (snapshot.connectionState == ConnectionState.done && _isLoggedIn)
             return TabBarView(
               controller: _tabController,
-              children: [
+              children: <Widget>[
                 RefreshIndicator(
-                  onRefresh: () => _getSubstitutionPlan,
+                  onRefresh: () => _substitutionPlan,
                   child: ListView.builder(
                     itemCount: _substitutionDays.length,
                     itemBuilder: (context, index) {
@@ -408,7 +406,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                             _currentColumns[i].querySelectorAll("td");
                         if (_currentRow[1].text.trim().isEmpty &&
                             _currentRow[8].text.trim().isNotEmpty) {
-                          int lastSubstitution = _classes
+                          final int lastSubstitution = _classes
                               .lastIndexWhere((_class) => _class.isNotEmpty);
                           _substitutionInformation[lastSubstitution] =
                               _substitutionInformation[lastSubstitution] +
@@ -419,29 +417,32 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                           _hours.add(_currentRow[1].text.trim());
                           _subjects.add(_currentRow[2].text.trim());
                           _substitutionTeachers.add(
-                              _currentRow[3].text.trim().replaceAll("+", ""));
+                              _currentRow[3].text.trim().replaceFirst("+", ""));
                           _teachers.add(_currentRow[4].text.trim());
                           _substitutionTypes.add(_currentRow[5].text.trim());
                           _substitutionSpan.add(_currentRow[6].text.trim());
-                          _rooms.add(
-                              _currentRow[7].text.trim().replaceAll("---", ""));
+                          _rooms.add(_currentRow[7]
+                              .text
+                              .trim()
+                              .replaceFirst("---", ""));
                           _substitutionInformation
                               .add(_currentRow[8].text.trim());
                         }
                       }
-                      if (!_teacherSelected &&
-                          !_classes.contains(_substitutionFilter) &&
-                          _substitutionFilter != "Alle Klassen anzeigen") {
-                        _noSubstitutionsAvailable = true;
-                      } else if (_teacherSelected &&
-                              !_teachers.contains(_substitutionFilter) ||
+                      if (_substitutionFilter == "Alle Klassen anzeigen" &&
+                          _hours.indexWhere((hour) => hour.isNotEmpty) != -1)
+                        _noSubstitutionsAvailable = false;
+                      else if (!_teacherSelected &&
+                          _classes.contains(_substitutionFilter))
+                        _noSubstitutionsAvailable = false;
+                      else if (_teacherSelected &&
+                              _teachers.contains(_substitutionFilter) ||
                           _teacherSelected &&
                               _substitutionTeachers
-                                  .contains(_substitutionFilter)) {
-                        _noSubstitutionsAvailable = true;
-                      } else {
+                                  .contains(_substitutionFilter))
                         _noSubstitutionsAvailable = false;
-                      }
+                      else
+                        _noSubstitutionsAvailable = true;
 
                       return Column(
                         children: [
@@ -461,7 +462,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                   width: MediaQuery.of(context).size.width,
                                   child: Card(
                                     child: Padding(
-                                      padding: EdgeInsets.all(18.0),
+                                      padding: const EdgeInsets.all(18.0),
                                       child: Center(
                                         child: Text(
                                           "Keine Vertretungen für diesen Tag",
@@ -577,7 +578,8 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                                                   children: <
                                                                       TextSpan>[
                                                                     TextSpan(
-                                                                        text: _subjects[index2].isEmpty
+                                                                        text: _subjects[index2].isEmpty ||
+                                                                                _classes[index2].isEmpty
                                                                             ? ""
                                                                             : " – "),
                                                                     TextSpan(
@@ -657,7 +659,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                   ),
                 ),
                 RefreshIndicator(
-                  onRefresh: () => _getSubstitutionPlan,
+                  onRefresh: () => _substitutionPlan,
                   child: ListView.builder(
                     itemCount: _substitutionDays.length,
                     itemBuilder: (context, index) {

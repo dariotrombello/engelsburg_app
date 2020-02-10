@@ -19,7 +19,7 @@ class WeatherPage extends StatefulWidget {
 class _WeatherPageState extends State<WeatherPage> {
   Future _loadWeather() async {
     final Response jsonAddress = await Client().get(Uri.encodeFull(
-        "https://api.darksky.net/forecast/<API_KEY>/51.315229,9.48816?lang=de&units=si&exclude=minutely,daily,flags"));
+        "https://api.darksky.net/forecast/<API_KEY>/51.315229,9.48816?lang=de&units=si&exclude=minutely,flags"));
     final jsonResponse = json.decode(jsonAddress.body);
     return DarkSky.fromJson(jsonResponse);
   }
@@ -262,7 +262,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
-                                          Icon(WeatherIcons.wind),
+                                          Icon(WeatherIcons.barometer),
                                           Padding(
                                             padding:
                                                 EdgeInsets.only(left: 16.0),
@@ -304,7 +304,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
-                                          Icon(WeatherIcons.sunset),
+                                          Icon(WeatherIcons.umbrella),
                                           Padding(
                                             padding:
                                                 EdgeInsets.only(left: 16.0),
@@ -346,7 +346,10 @@ class _WeatherPageState extends State<WeatherPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
-                                          Icon(WeatherIcons.wind),
+                                          WindIcon(
+                                              degree: snapshot
+                                                  .data.currently.windBearing
+                                                  .toDouble()),
                                           Padding(
                                             padding:
                                                 EdgeInsets.only(left: 16.0),
@@ -539,7 +542,7 @@ class _WeatherPageState extends State<WeatherPage> {
                               padding: EdgeInsets.only(top: 24.0),
                             ),
                             SizedBox(
-                              height: 100,
+                              height: 88,
                               child: ScrollConfiguration(
                                 behavior: DisableGlow(),
                                 child: ListView.builder(
@@ -584,8 +587,398 @@ class _WeatherPageState extends State<WeatherPage> {
                                 ),
                               ),
                             ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 24.0),
+                            ),
                             Text(
-                              "Wetterdaten von Dark Sky",
+                              "Wettervorhersage",
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontSize: _height * 0.04,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              "7 Tage",
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .caption
+                                      .color),
+                            ),
+                            Padding(padding: EdgeInsets.only(top: 16.0)),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: snapshot.data.daily.data.length,
+                              itemBuilder: (context, index) {
+                                String weekday() {
+                                  switch (DateTime.fromMillisecondsSinceEpoch(
+                                          snapshot.data.daily.data[index].time *
+                                              1000)
+                                      .weekday) {
+                                    case 1:
+                                      return "Montag";
+                                    case 2:
+                                      return "Dienstag";
+                                    case 3:
+                                      return "Mittwoch";
+                                    case 4:
+                                      return "Donnerstag";
+                                    case 5:
+                                      return "Freitag";
+                                    case 6:
+                                      return "Samstag";
+                                    case 7:
+                                      return "Sonntag";
+                                    default:
+                                      return "N/A";
+                                  }
+                                }
+
+                                String date = DateFormat("dd.MM.y").format(
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                        snapshot.data.daily.data[index].time *
+                                            1000));
+
+                                return ExpansionTile(
+                                  leading: weatherIcon(
+                                      snapshot.data.daily.data[index].icon),
+                                  title: Text(weekday() + " " + date),
+                                  subtitle: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      RichText(
+                                        textAlign: TextAlign.start,
+                                        text: TextSpan(
+                                          children: <InlineSpan>[
+                                            WidgetSpan(
+                                                child: BoxedIcon(
+                                              WeatherIcons.rain,
+                                              size: 16.0,
+                                            )),
+                                            WidgetSpan(
+                                              child: Padding(
+                                                padding: EdgeInsets.only(
+                                                    bottom: 2.0),
+                                                child: Text((snapshot
+                                                                .data
+                                                                .daily
+                                                                .data[index]
+                                                                .precipProbability *
+                                                            100)
+                                                        .round()
+                                                        .toString() +
+                                                    "%"),
+                                              ),
+                                            ),
+                                            WidgetSpan(
+                                                child: Padding(
+                                              padding:
+                                                  EdgeInsets.only(left: 16.0),
+                                            )),
+                                            WidgetSpan(
+                                                child: BoxedIcon(
+                                              WeatherIcons.thermometer,
+                                              size: 16.0,
+                                            )),
+                                            WidgetSpan(
+                                              child: Padding(
+                                                padding: EdgeInsets.only(
+                                                    bottom: 2.0),
+                                                child: Text((snapshot
+                                                            .data
+                                                            .daily
+                                                            .data[index]
+                                                            .temperatureMin)
+                                                        .round()
+                                                        .toString() +
+                                                    " ℃" +
+                                                    " | " +
+                                                    (snapshot
+                                                            .data
+                                                            .daily
+                                                            .data[index]
+                                                            .temperatureMax)
+                                                        .round()
+                                                        .toString() +
+                                                    " ℃"),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  children: <Widget>[
+                                    Row(
+                                      children: <Widget>[
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Card(
+                                              child: Padding(
+                                                padding: EdgeInsets.all(16.0),
+                                                child: Row(
+                                                  children: <Widget>[
+                                                    Icon(WeatherIcons.umbrella),
+                                                    Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 16.0)),
+                                                    Column(
+                                                      children: <Widget>[
+                                                        Container(
+                                                          width: _width * 0.2,
+                                                          child: Text(
+                                                            "UV-Index",
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                        ),
+                                                        Text(snapshot.data.daily
+                                                            .data[index].uvIndex
+                                                            .toString()),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Card(
+                                              child: Padding(
+                                                padding: EdgeInsets.all(16.0),
+                                                child: Row(
+                                                  children: <Widget>[
+                                                    WindIcon(
+                                                        degree: snapshot
+                                                            .data
+                                                            .daily
+                                                            .data[index]
+                                                            .windBearing
+                                                            .toDouble()),
+                                                    Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 16.0)),
+                                                    Column(
+                                                      children: <Widget>[
+                                                        Container(
+                                                          width: _width * 0.2,
+                                                          child: Text(
+                                                            "Windgeschwindigkeit",
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                        ),
+                                                        Text(snapshot
+                                                                .data
+                                                                .daily
+                                                                .data[index]
+                                                                .windSpeed
+                                                                .round()
+                                                                .toString() +
+                                                            " km/h"),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Card(
+                                              child: Padding(
+                                                padding: EdgeInsets.all(16.0),
+                                                child: Row(
+                                                  children: <Widget>[
+                                                    Icon(WeatherIcons.sunrise),
+                                                    Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 16.0)),
+                                                    Column(
+                                                      children: <Widget>[
+                                                        Container(
+                                                          width: _width * 0.2,
+                                                          child: Text(
+                                                            "Sonnenaufgang",
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                        ),
+                                                        Text(DateFormat("HH:mm")
+                                                            .format(DateTime
+                                                                .fromMillisecondsSinceEpoch(snapshot
+                                                                        .data
+                                                                        .daily
+                                                                        .data[
+                                                                            index]
+                                                                        .sunriseTime *
+                                                                    1000))),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: <Widget>[
+                                            Card(
+                                              child: Padding(
+                                                padding: EdgeInsets.all(16.0),
+                                                child: Row(
+                                                  children: <Widget>[
+                                                    Icon(WeatherIcons.cloud),
+                                                    Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 16.0)),
+                                                    Column(
+                                                      children: <Widget>[
+                                                        Container(
+                                                          width: _width * 0.2,
+                                                          child: Text(
+                                                            "Bewölkung",
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                        ),
+                                                        Text((snapshot
+                                                                        .data
+                                                                        .daily
+                                                                        .data[
+                                                                            index]
+                                                                        .cloudCover *
+                                                                    100)
+                                                                .round()
+                                                                .toString() +
+                                                            "%"),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Card(
+                                              child: Padding(
+                                                padding: EdgeInsets.all(16.0),
+                                                child: Row(
+                                                  children: <Widget>[
+                                                    Icon(
+                                                        WeatherIcons.barometer),
+                                                    Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 16.0)),
+                                                    Column(
+                                                      children: <Widget>[
+                                                        Container(
+                                                          width: _width * 0.2,
+                                                          child: Text(
+                                                            "Luftdruck",
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                        ),
+                                                        Text(snapshot
+                                                                .data
+                                                                .daily
+                                                                .data[index]
+                                                                .pressure
+                                                                .round()
+                                                                .toString() +
+                                                            " hPa"),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Card(
+                                              child: Padding(
+                                                padding: EdgeInsets.all(16.0),
+                                                child: Row(
+                                                  children: <Widget>[
+                                                    Icon(WeatherIcons.sunrise),
+                                                    Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 16.0)),
+                                                    Column(
+                                                      children: <Widget>[
+                                                        Container(
+                                                          width: _width * 0.2,
+                                                          child: Text(
+                                                            "Sonnenuntergang",
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                        ),
+                                                        Text(DateFormat("HH:mm")
+                                                            .format(DateTime
+                                                                .fromMillisecondsSinceEpoch(snapshot
+                                                                        .data
+                                                                        .daily
+                                                                        .data[
+                                                                            index]
+                                                                        .sunsetTime *
+                                                                    1000))),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                            Text(
+                              "\nWetterdaten von Dark Sky",
                               textAlign: TextAlign.center,
                             )
                           ],

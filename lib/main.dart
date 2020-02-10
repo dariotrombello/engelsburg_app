@@ -39,6 +39,7 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
           SchuelerzeitungPage(),
           VertretungsplanPage()
         ],
+        physics: NeverScrollableScrollPhysics(),
       ),
       drawer: Drawer(
         child: ListView(
