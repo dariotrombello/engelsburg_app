@@ -16,31 +16,18 @@ class NewsPage extends StatefulWidget {
 
 class NewsPageState extends State<NewsPage>
     with AutomaticKeepAliveClientMixin<NewsPage> {
-  Future<List<wp.Post>> _posts;
   static wp.WordPress _wordPress =
       wp.WordPress(baseUrl: 'https://engelsburg.smmp.de');
-
-  Future<void> _fetchPosts() {
-    setState(() {
-      _posts = _wordPress.fetchPosts(
-        postParams: wp.ParamsPostList(
-          context: wp.WordPressContext.view,
-          pageNum: 1,
-          perPage: 20,
-          order: wp.Order.desc,
-          orderBy: wp.PostOrderBy.date,
-        ),
-        /* fetchFeaturedMedia: true */
-      );
-    });
-    return _posts;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _posts = _fetchPosts();
-  }
+  final Future<List<wp.Post>> _fetchPosts = _wordPress.fetchPosts(
+    postParams: wp.ParamsPostList(
+      context: wp.WordPressContext.view,
+      pageNum: 1,
+      perPage: 20,
+      order: wp.Order.desc,
+      orderBy: wp.PostOrderBy.date,
+    ),
+    /* fetchFeaturedMedia: true */
+  );
 
   Widget _buildPostCard({
     final String content,
@@ -95,11 +82,11 @@ class NewsPageState extends State<NewsPage>
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder<List<wp.Post>>(
-      future: _posts,
+      future: _fetchPosts,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return RefreshIndicator(
-            onRefresh: () => _posts,
+            onRefresh: () => _fetchPosts,
             child: ListView.builder(
               itemCount: snapshot.data.length,
               itemBuilder: (context, index) {
@@ -114,28 +101,6 @@ class NewsPageState extends State<NewsPage>
                 );
               },
             ),
-          );
-        } else if (snapshot.hasError) {
-          // Wenn die Nachrichten nicht geladen werden können, wird die Schaltfläche zum Neuladen angezeigt.
-          return Column(
-            children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Text(
-                    snapshot.error.toString(),
-                    style: TextStyle(color: Colors.red),
-                  )),
-              SizedBox(
-                height: 50,
-                width: 200,
-                child: RaisedButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0)),
-                  color: Colors.blue,
-                  onPressed: () => _posts,
-                ),
-              )
-            ],
           );
         }
         return Center(

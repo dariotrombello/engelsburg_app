@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:weather_icons/weather_icons.dart';
+import 'package:weather_icons/src/util/rotate.dart';
 
 import 'backend/weatherdata.dart';
 import 'main.dart';
@@ -19,7 +20,7 @@ class WeatherPage extends StatefulWidget {
 class _WeatherPageState extends State<WeatherPage> {
   Future _loadWeather() async {
     final Response jsonAddress = await Client().get(Uri.encodeFull(
-        "https://api.darksky.net/forecast/<API_KEY>/51.315229,9.48816?lang=de&units=si&exclude=minutely,flags"));
+        "https://api.darksky.net/forecast/<API_KEY>/51.315229,9.48816?lang=de&units=ca&exclude=minutely,flags"));
     final jsonResponse = json.decode(jsonAddress.body);
     return DarkSky.fromJson(jsonResponse);
   }
@@ -52,7 +53,7 @@ class _WeatherPageState extends State<WeatherPage> {
                 case "sleet":
                   return Icon(WeatherIcons.sleet);
                 case "wind":
-                  return Icon(WeatherIcons.windy);
+                  return Icon(WeatherIcons.strong_wind);
                 case "fog":
                   return Icon(WeatherIcons.fog);
                 case "cloudy":
@@ -346,10 +347,12 @@ class _WeatherPageState extends State<WeatherPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
-                                          WindIcon(
-                                              degree: snapshot
-                                                  .data.currently.windBearing
-                                                  .toDouble()),
+                                          Rotate(
+                                            degree: snapshot
+                                                .data.currently.windBearing
+                                                .toDouble(),
+                                            child: Icon(WeatherIcons.wind),
+                                          ),
                                           Padding(
                                             padding:
                                                 EdgeInsets.only(left: 16.0),
@@ -643,7 +646,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                 return ExpansionTile(
                                   leading: weatherIcon(
                                       snapshot.data.daily.data[index].icon),
-                                  title: Text(weekday() + " " + date),
+                                  title: Text(weekday() + ", " + date),
                                   subtitle: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -712,10 +715,10 @@ class _WeatherPageState extends State<WeatherPage> {
                                   ),
                                   children: <Widget>[
                                     Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
                                       children: <Widget>[
                                         Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
                                           children: <Widget>[
                                             Card(
                                               child: Padding(
@@ -728,6 +731,9 @@ class _WeatherPageState extends State<WeatherPage> {
                                                             EdgeInsets.only(
                                                                 left: 16.0)),
                                                     Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: <Widget>[
                                                         Container(
                                                           width: _width * 0.2,
@@ -757,18 +763,24 @@ class _WeatherPageState extends State<WeatherPage> {
                                                 padding: EdgeInsets.all(16.0),
                                                 child: Row(
                                                   children: <Widget>[
-                                                    WindIcon(
-                                                        degree: snapshot
-                                                            .data
-                                                            .daily
-                                                            .data[index]
-                                                            .windBearing
-                                                            .toDouble()),
+                                                    Rotate(
+                                                      degree: snapshot
+                                                          .data
+                                                          .daily
+                                                          .data[index]
+                                                          .windBearing
+                                                          .toDouble(),
+                                                      child: Icon(
+                                                          WeatherIcons.wind),
+                                                    ),
                                                     Padding(
                                                         padding:
                                                             EdgeInsets.only(
                                                                 left: 16.0)),
                                                     Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: <Widget>[
                                                         Container(
                                                           width: _width * 0.2,
@@ -809,6 +821,9 @@ class _WeatherPageState extends State<WeatherPage> {
                                                             EdgeInsets.only(
                                                                 left: 16.0)),
                                                     Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: <Widget>[
                                                         Container(
                                                           width: _width * 0.2,
@@ -856,6 +871,9 @@ class _WeatherPageState extends State<WeatherPage> {
                                                             EdgeInsets.only(
                                                                 left: 16.0)),
                                                     Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: <Widget>[
                                                         Container(
                                                           width: _width * 0.2,
@@ -899,6 +917,9 @@ class _WeatherPageState extends State<WeatherPage> {
                                                             EdgeInsets.only(
                                                                 left: 16.0)),
                                                     Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: <Widget>[
                                                         Container(
                                                           width: _width * 0.2,
@@ -933,12 +954,15 @@ class _WeatherPageState extends State<WeatherPage> {
                                                 padding: EdgeInsets.all(16.0),
                                                 child: Row(
                                                   children: <Widget>[
-                                                    Icon(WeatherIcons.sunrise),
+                                                    Icon(WeatherIcons.sunset),
                                                     Padding(
                                                         padding:
                                                             EdgeInsets.only(
                                                                 left: 16.0)),
                                                     Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: <Widget>[
                                                         Container(
                                                           width: _width * 0.2,

@@ -12,15 +12,7 @@ class CafeteriaPage extends StatefulWidget {
 
 class _CafeteriaPageState extends State<CafeteriaPage>
     with AutomaticKeepAliveClientMixin<CafeteriaPage> {
-  Future<List<String>> _getCafeteriaPlan;
-
-  @override
-  void initState() {
-    super.initState();
-    _getCafeteriaPlan = _getCafeteriaPlanInit();
-  }
-
-  Future<List<String>> _getCafeteriaPlanInit() async {
+  Future<List<String>> _getCafeteriaPlan() async {
     final List<String> _cafeteriaDetailList = [];
     final Response content = await Client()
         .get('https://engelsburg.smmp.de/leben-an-der-schule/cafeteria/');
@@ -43,11 +35,11 @@ class _CafeteriaPageState extends State<CafeteriaPage>
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder(
-      future: _getCafeteriaPlan,
+      future: _getCafeteriaPlan(),
       builder: (context, snapshot) {
         if (snapshot.hasData)
           return RefreshIndicator(
-            onRefresh: () => _getCafeteriaPlan,
+            onRefresh: () => _getCafeteriaPlan(),
             child: ListView(
               padding: EdgeInsets.only(top: 16.0),
               children: <Widget>[

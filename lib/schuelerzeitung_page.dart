@@ -13,10 +13,9 @@ class SchuelerzeitungPage extends StatefulWidget {
 
 class _SchuelerzeitungPageState extends State<SchuelerzeitungPage>
     with AutomaticKeepAliveClientMixin<SchuelerzeitungPage> {
-  Future _pdfDocument;
   bool _hasSupport;
 
-  Future<PDFDocument> _pdfDocumentInit() async {
+  Future<PDFDocument> _pdfDocument() async {
     final deviceInfo = DeviceInfoPlugin();
     if (Platform.isIOS) {
       final iosInfo = await deviceInfo.iosInfo;
@@ -30,16 +29,10 @@ class _SchuelerzeitungPageState extends State<SchuelerzeitungPage>
   }
 
   @override
-  void initState() {
-    _pdfDocument = _pdfDocumentInit();
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder(
-      future: _pdfDocument,
+      future: _pdfDocument(),
       builder: (context, snapshot) {
         if (snapshot.hasData && !_hasSupport)
           return Padding(

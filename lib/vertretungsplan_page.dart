@@ -70,12 +70,11 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
 
   Future _getSubstitutionPlan() async {
     List<String> untisWeeks = [];
-    final SharedPreferences _prefs = await SharedPreferences.getInstance();
     final Response navbar = await Client().get(Uri.encodeFull(
         'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/frames/navbar.htm'));
     final dom.Document navbarDocument = parse(navbar.body);
     final List<dom.Element> navbarWeeks =
-        navbarDocument.querySelectorAll("select.selectbox > option");
+        navbarDocument.querySelectorAll("select[name=week] > option");
     final String info = navbarDocument.querySelector("span.description").text;
     _lastChanged = info.substring(info.indexOf("Stand:")).trim();
 
@@ -120,7 +119,6 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
         .split(",");
     _allClasses.insert(0, "Alle Klassen anzeigen");
     _prefs.setStringList('allClasses', _allClasses);
-    setState(() {});
   }
 
   Future _substitutionPlanInit() async {
@@ -196,12 +194,12 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                             "Um sich anzumelden, wird das Passwort benötigt, das auch für den Vertretungsplan auf der Internetseite der Engelsburg verwendet wird. Es steht derzeit auch auf Werbezetteln, die an der ganzen Schule an den Eingangstüren hängen. Falls Sie es nicht finden können, sprechen Sie mich in der Schule an oder schreiben Sie mir eine E-Mail mit Nachweis als Schüler/Lehrer an ",
                         children: <TextSpan>[
                           TextSpan(
-                              text: "dariotrombello@gmail.com",
+                              text: "mail@dariotrombello.it",
                               style: TextStyle(color: Colors.blue),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
-                                  url_launcher.launch(
-                                      "mailto:dariotrombello@gmail.com");
+                                  url_launcher
+                                      .launch("mailto:mail@dariotrombello.it");
                                 }),
                           TextSpan(text: ".")
                         ],
@@ -334,7 +332,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                               decoration: ShapeDecoration(
                                   shape: RoundedRectangleBorder(
                                       side: BorderSide(
-                                          width: 1.0, color: Colors.white38),
+                                          width: 1.0, color: Colors.grey),
                                       borderRadius: BorderRadius.all(
                                           Radius.circular(4.0)))),
                               child: DropdownButtonHideUnderline(
@@ -383,7 +381,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
               controller: _tabController,
               children: <Widget>[
                 RefreshIndicator(
-                  onRefresh: () => _substitutionPlan,
+                  onRefresh: () => _substitutionPlan = _substitutionPlanInit(),
                   child: ListView.builder(
                     itemCount: _substitutionDays.length,
                     itemBuilder: (context, index) {
@@ -659,7 +657,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                   ),
                 ),
                 RefreshIndicator(
-                  onRefresh: () => _substitutionPlan,
+                  onRefresh: () => _substitutionPlan = _substitutionPlanInit(),
                   child: ListView.builder(
                     itemCount: _substitutionDays.length,
                     itemBuilder: (context, index) {

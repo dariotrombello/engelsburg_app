@@ -113,7 +113,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         Radius.circular(4.0)))),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
-                                  items: _allClasses
+                                  items: _allClasses.sublist(1)
                                       .map((String item) =>
                                           DropdownMenuItem<String>(
                                               value: item, child: Text(item)))

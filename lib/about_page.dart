@@ -81,14 +81,14 @@ class _AboutPageState extends State<AboutPage> {
             title: Text(
               'Besuche meine Webseite',
             ),
-            onTap: () => url_launcher.launch("https://dariotrombello.de"),
+            onTap: () => url_launcher.launch("https://dariotrombello.it"),
           ),
           ListTile(
             leading: Icon(Icons.mail),
             title: Text(
               'Schreibe mir eine E-Mail',
             ),
-            onTap: () => url_launcher.launch("mailto:dariotrombello@gmail.com"),
+            onTap: () => url_launcher.launch("mailto:mail@dariotrombello.it"),
           ),
           Divider(),
           ListTile(
