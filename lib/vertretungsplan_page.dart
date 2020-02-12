@@ -44,15 +44,16 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
 
   Future _checkLogin() async {
     _prefs = await SharedPreferences.getInstance();
-    _isLoggedIn = (_prefs.getBool('isLoggedIn') ?? false) &&
-        _prefs.getString('substitutionFilter') != null;
+    setState(() => _isLoggedIn = (_prefs.getBool('isLoggedIn') ?? false) &&
+        _prefs.getString('substitutionFilter') != null);
     await _prefs.setBool('isLoggedIn', _isLoggedIn);
   }
 
   Future _logIn() async {
     _prefs = await SharedPreferences.getInstance();
     await _prefs.setBool('isLoggedIn', true);
-    setState(() => _isLoggedIn = (_prefs.getBool('isLoggedIn') ?? false));
+    setState(() => _isLoggedIn = (_prefs.getBool('isLoggedIn') &&
+        _prefs.getString('substitutionFilter') != null));
   }
 
   Future _getSubstitutionFilter() async {
@@ -69,6 +70,8 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
   }
 
   Future _getSubstitutionPlan() async {
+    _substitutionDays.clear();
+    _newsDays.clear();
     List<String> untisWeeks = [];
     final Response navbar = await Client().get(Uri.encodeFull(
         'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/frames/navbar.htm'));
@@ -92,6 +95,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
           substitutionTableDocument.querySelectorAll("table");
       final List<dom.Element> days = substitutionTableDocument
           .querySelectorAll("#vertretung > p > b, #vertretung > b");
+
       for (int i = 0; i < _allSubstitutionDays.length; i++) {
         if (_allSubstitutionDays[i].querySelector("tr.list > td") != null &&
             _allSubstitutionDays[i].querySelector("tr.list > td").text !=
