@@ -20,7 +20,7 @@ class _AboutPageState extends State<AboutPage> {
   final String appDescription =
       "Eine App von Dario Trombello (Klasse 10d), die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.";
 
-  void initializePackageInfo() async {
+  void initializePackageInfo() {
     PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
       setState(() {
         appName = packageInfo.appName;

@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:weather_icons/weather_icons.dart';
 import 'package:weather_icons/src/util/rotate.dart';
 
-import 'backend/weatherdata.dart';
+import 'model/weatherdata.dart';
 import 'main.dart';
 
 class WeatherPage extends StatefulWidget {

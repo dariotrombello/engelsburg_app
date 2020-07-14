@@ -76,8 +76,9 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
     final Response navbar = await Client().get(Uri.encodeFull(
         'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/frames/navbar.htm'));
     final dom.Document navbarDocument = parse(navbar.body);
-    final List<dom.Element> navbarWeeks =
-        navbarDocument.querySelectorAll("select[name=week] > option");
+    final List<dom.Element> navbarWeeks = DateTime.now().weekday >= 5
+        ? navbarDocument.querySelectorAll("select[name=week] > option")
+        : [navbarDocument.querySelector("select[name=week] > option")];
     final String info = navbarDocument.querySelector("span.description").text;
     _lastChanged = info.substring(info.indexOf("Stand:")).trim();
 
@@ -146,7 +147,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                   child: Text(
                     "Vertretungsplan",
                     style: TextStyle(
-                        color: Theme.of(context).textTheme.body1.color),
+                        color: Theme.of(context).textTheme.bodyText2.color),
                   ),
                 ),
                 Tab(
@@ -154,7 +155,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                   child: Text(
                     "Nachrichten",
                     style: TextStyle(
-                        color: Theme.of(context).textTheme.body1.color),
+                        color: Theme.of(context).textTheme.bodyText2.color),
                   ),
                 ),
               ],
@@ -193,17 +194,17 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                       text: TextSpan(
                         style: TextStyle(
                             fontSize: _displayHeight * 0.02,
-                            color: Theme.of(context).textTheme.body1.color),
+                            color: Theme.of(context).textTheme.bodyText2.color),
                         text:
                             "Um sich anzumelden, wird das Passwort benötigt, das auch für den Vertretungsplan auf der Internetseite der Engelsburg verwendet wird. Es steht derzeit auch auf Werbezetteln, die an der ganzen Schule an den Eingangstüren hängen. Falls Sie es nicht finden können, sprechen Sie mich in der Schule an oder schreiben Sie mir eine E-Mail mit Nachweis als Schüler/Lehrer an ",
                         children: <TextSpan>[
                           TextSpan(
-                              text: "mail@dariotrombello.it",
+                              text: "info@dariotrombello.it",
                               style: TextStyle(color: Colors.blue),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   url_launcher
-                                      .launch("mailto:mail@dariotrombello.it");
+                                      .launch("mailto:info@dariotrombello.it");
                                 }),
                           TextSpan(text: ".")
                         ],

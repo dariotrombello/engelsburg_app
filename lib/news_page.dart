@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/style.dart';
 
 import 'dart:async';
 
@@ -138,12 +139,14 @@ class NewsPageIndepth extends StatelessWidget {
           ),
           Divider(),
           Html(
-            defaultTextStyle: TextStyle(
-                fontFamily: "Montserrat", fontSize: 16.0, height: 1.5),
+            style: {
+              "html": Style.fromTextStyle(
+                TextStyle(
+                    fontFamily: "Montserrat", fontSize: 16.0, height: 1.5),
+              ),
+            },
             onLinkTap: (link) => url_launcher.launch(link),
             data: content,
-            useRichText: true,
-            renderNewlines: true,
           )
         ],
       ),

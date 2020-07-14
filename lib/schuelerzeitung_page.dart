@@ -13,28 +13,30 @@ class SchuelerzeitungPage extends StatefulWidget {
 
 class _SchuelerzeitungPageState extends State<SchuelerzeitungPage>
     with AutomaticKeepAliveClientMixin<SchuelerzeitungPage> {
-  bool _hasSupport;
+  final PdfController _pdfController = PdfController(
+    document: PdfDocument.openAsset('assets/schuelerzeitung.pdf'),
+  );
 
-  Future<PDFDocument> _pdfDocument() async {
-    final deviceInfo = DeviceInfoPlugin();
-    if (Platform.isIOS) {
-      final iosInfo = await deviceInfo.iosInfo;
-      _hasSupport = int.parse(iosInfo.systemVersion.split('.').first) >= 11;
-    } else if (Platform.isAndroid) {
-      final androidInfo = await deviceInfo.androidInfo;
-      _hasSupport = androidInfo.version.sdkInt >= 21;
+  Future<bool> _hasSupport() async {
+    if (Platform.isMacOS || Platform.isIOS) {
+      return true;
     }
-
-    return PDFDocument.openAsset("assets/schuelerzeitung.pdf");
+    final deviceInfo = DeviceInfoPlugin();
+    bool hasSupport = false;
+    if (Platform.isAndroid) {
+      final androidInfo = await deviceInfo.androidInfo;
+      hasSupport = androidInfo.version.sdkInt >= 21;
+    }
+    return hasSupport;
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder(
-      future: _pdfDocument(),
+      future: _hasSupport(),
       builder: (context, snapshot) {
-        if (snapshot.hasData && !_hasSupport)
+        if (!snapshot.data)
           return Padding(
             padding: EdgeInsets.all(16.0),
             child: Column(
@@ -55,10 +57,10 @@ class _SchuelerzeitungPageState extends State<SchuelerzeitungPage>
               ],
             ),
           );
-        if (snapshot.hasData) return PDFView(document: snapshot.data);
-        return Center(
-          child: CircularProgressIndicator(),
-        );
+        if (snapshot.data) {
+          return PdfView(controller: _pdfController);
+        }
+        return Container();
       },
     );
   }
