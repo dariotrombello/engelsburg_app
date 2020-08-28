@@ -10,15 +10,12 @@ import 'package:weather_icons/weather_icons.dart';
 import 'package:weather_icons/src/util/rotate.dart';
 
 import 'model/weatherdata.dart';
-import 'main.dart';
 
-class WeatherPage extends StatefulWidget {
-  @override
-  _WeatherPageState createState() => _WeatherPageState();
-}
-
-class _WeatherPageState extends State<WeatherPage> {
+class WeatherPage extends StatelessWidget {
   Future _loadWeather() async {
+    // DarkSky wurde durch Apple aufgekauft
+    // und daher wird die API 2021 eingestellt
+    // TODO: DarkSky durch anderen Wetterdatenanbieter ersetzen
     final Response jsonAddress = await Client().get(Uri.encodeFull(
         "https://api.darksky.net/forecast/<API_KEY>/51.315229,9.48816?lang=de&units=ca&exclude=minutely,flags"));
     final jsonResponse = json.decode(jsonAddress.body);
@@ -27,14 +24,12 @@ class _WeatherPageState extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double _height = MediaQuery.of(context).size.height -
-        EngelsburgAppBar().preferredSize.height;
-    final double _width = MediaQuery.of(context).size.width;
+    final double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: EngelsburgAppBar(
-        title: "Wetter",
-        withBackButton: true,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("Wetter"),
       ),
       body: FutureBuilder(
         future: _loadWeather(),
@@ -81,8 +76,8 @@ class _WeatherPageState extends State<WeatherPage> {
                     overflow: Overflow.visible,
                     children: <Widget>[
                       Image.asset(
-                        "assets/weather-background.jpg",
-                        height: _height * 0.4,
+                        "assets/images/weather-background.jpg",
+                        height: 250,
                         fit: BoxFit.cover,
                       ),
                       Positioned(
@@ -97,35 +92,37 @@ class _WeatherPageState extends State<WeatherPage> {
                                       .toString() +
                                   "°",
                               style: TextStyle(
-                                fontSize: _height * 0.1,
+                                fontSize: 72.0,
                                 color: Colors.white,
                                 shadows: [
                                   Shadow(
-                                      offset: Offset(2, 2),
-                                      blurRadius: 5,
-                                      color: Colors.grey)
+                                      offset: Offset(1, 1),
+                                      blurRadius: 4,
+                                      color: Colors.black54)
                                 ],
                               ),
                             ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.start,
                               children: <Widget>[
                                 Icon(Icons.location_on, color: Colors.white),
                                 Container(
-                                  width: _width * 0.6,
+                                  padding: EdgeInsets.only(left: 8.0),
+                                  width: width * 0.6,
                                   child: Text(
                                     "Engelsburg Gymnasium Kassel" +
                                         " – " +
-                                        snapshot.data.currently.summary,
+                                        snapshot.data.currently.summary
+                                            .toString(),
                                     style: TextStyle(
                                       color: Colors.white,
                                       height: 1.5,
-                                      fontSize: _height * 0.024,
+                                      fontSize: 16.0,
                                       shadows: [
                                         Shadow(
                                             offset: Offset(1, 1),
-                                            blurRadius: 3,
-                                            color: Colors.grey)
+                                            blurRadius: 4,
+                                            color: Colors.black54)
                                       ],
                                     ),
                                   ),
@@ -138,7 +135,7 @@ class _WeatherPageState extends State<WeatherPage> {
                     ],
                   ),
                   SizedBox(
-                    width: _width,
+                    width: width,
                     child: Card(
                       margin: EdgeInsets.all(0),
                       child: Container(
@@ -150,8 +147,7 @@ class _WeatherPageState extends State<WeatherPage> {
                               "Einzelheiten",
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                  fontSize: _height * 0.04,
-                                  fontWeight: FontWeight.bold),
+                                  fontSize: 28.0, fontWeight: FontWeight.bold),
                             ),
                             Text(
                               "Aktuelles Wetter",
@@ -186,7 +182,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Container(
-                                                width: _width * 0.3,
+                                                width: width * 0.3,
                                                 child: Text(
                                                   "Gefühlte Temperatur",
                                                   maxLines: 1,
@@ -229,7 +225,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Container(
-                                                width: _width * 0.3,
+                                                width: width * 0.3,
                                                 child: Text(
                                                   "Luftfeuchtigkeit",
                                                   maxLines: 1,
@@ -273,7 +269,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Container(
-                                                width: _width * 0.3,
+                                                width: width * 0.3,
                                                 child: Text(
                                                   "Luftdruck",
                                                   maxLines: 1,
@@ -315,7 +311,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Container(
-                                                width: _width * 0.3,
+                                                width: width * 0.3,
                                                 child: Text(
                                                   "UV-Index",
                                                   maxLines: 1,
@@ -362,7 +358,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Container(
-                                                width: _width * 0.3,
+                                                width: width * 0.3,
                                                 child: Text(
                                                   "Windgeschwindigkeit",
                                                   maxLines: 1,
@@ -405,7 +401,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Container(
-                                                width: _width * 0.3,
+                                                width: width * 0.3,
                                                 child: Text(
                                                   "Niederschlagswahrscheinlichkeit",
                                                   maxLines: 1,
@@ -449,7 +445,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Container(
-                                                width: _width * 0.3,
+                                                width: width * 0.3,
                                                 child: Text(
                                                   "Bewölkung",
                                                   maxLines: 1,
@@ -493,7 +489,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Container(
-                                                width: _width * 0.3,
+                                                width: width * 0.3,
                                                 child: Text(
                                                   "Sichtweite",
                                                   maxLines: 1,
@@ -530,8 +526,7 @@ class _WeatherPageState extends State<WeatherPage> {
                               "Wettervorhersage",
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                  fontSize: _height * 0.04,
-                                  fontWeight: FontWeight.bold),
+                                  fontSize: 28.0, fontWeight: FontWeight.bold),
                             ),
                             Text(
                               "24 Stunden",
@@ -546,48 +541,46 @@ class _WeatherPageState extends State<WeatherPage> {
                             ),
                             SizedBox(
                               height: 88,
-                              child: ScrollConfiguration(
-                                behavior: DisableGlow(),
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: snapshot.data.hourly.data.length,
-                                  itemBuilder: (context, index) {
-                                    String hour = DateFormat("HH:mm").format(
-                                        DateTime.fromMillisecondsSinceEpoch(
-                                            snapshot.data.hourly.data[index]
-                                                    .time *
-                                                1000));
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: snapshot.data.hourly.data.length,
+                                itemBuilder: (context, index) {
+                                  final String hour = DateFormat("HH:mm")
+                                      .format(
+                                          DateTime.fromMillisecondsSinceEpoch(
+                                              snapshot.data.hourly.data[index]
+                                                      .time *
+                                                  1000));
 
-                                    return Column(
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: EdgeInsets.fromLTRB(
-                                              16.0, 0.0, 16.0, 16.0),
-                                          child: Column(
-                                            children: <Widget>[
-                                              Text(snapshot.data.hourly
-                                                      .data[index].temperature
-                                                      .round()
-                                                      .toString() +
-                                                  " ℃"),
-                                              weatherIcon(snapshot.data.hourly
-                                                  .data[index].icon),
-                                              Padding(
-                                                padding:
-                                                    EdgeInsets.only(top: 16.0),
-                                              ),
-                                              Column(
-                                                children: <Widget>[
-                                                  Text(hour.toString())
-                                                ],
-                                              ),
-                                            ],
-                                          ),
+                                  return Column(
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: EdgeInsets.fromLTRB(
+                                            16.0, 0.0, 16.0, 16.0),
+                                        child: Column(
+                                          children: <Widget>[
+                                            Text(snapshot.data.hourly
+                                                    .data[index].temperature
+                                                    .round()
+                                                    .toString() +
+                                                " ℃"),
+                                            weatherIcon(snapshot
+                                                .data.hourly.data[index].icon),
+                                            Padding(
+                                              padding:
+                                                  EdgeInsets.only(top: 16.0),
+                                            ),
+                                            Column(
+                                              children: <Widget>[
+                                                Text(hour.toString())
+                                              ],
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    );
-                                  },
-                                ),
+                                      ),
+                                    ],
+                                  );
+                                },
                               ),
                             ),
                             Padding(
@@ -597,8 +590,7 @@ class _WeatherPageState extends State<WeatherPage> {
                               "Wettervorhersage",
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                  fontSize: _height * 0.04,
-                                  fontWeight: FontWeight.bold),
+                                  fontSize: 28.0, fontWeight: FontWeight.bold),
                             ),
                             Text(
                               "7 Tage",
@@ -638,18 +630,19 @@ class _WeatherPageState extends State<WeatherPage> {
                                   }
                                 }
 
-                                String date = DateFormat("dd.MM.y").format(
-                                    DateTime.fromMillisecondsSinceEpoch(
+                                String date = DateFormat("dd.MM.y")
+                                    .format(DateTime.fromMillisecondsSinceEpoch(
                                         snapshot.data.daily.data[index].time *
-                                            1000));
+                                            1000))
+                                    .toString();
 
                                 return ExpansionTile(
                                   leading: weatherIcon(
                                       snapshot.data.daily.data[index].icon),
                                   title: Text(weekday() + ", " + date),
-                                  subtitle: Row(
+                                  subtitle: Wrap(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                        WrapCrossAlignment.start,
                                     children: <Widget>[
                                       RichText(
                                         textAlign: TextAlign.start,
@@ -676,10 +669,8 @@ class _WeatherPageState extends State<WeatherPage> {
                                               ),
                                             ),
                                             WidgetSpan(
-                                                child: Padding(
-                                              padding:
-                                                  EdgeInsets.only(left: 16.0),
-                                            )),
+                                              child: VerticalDivider(),
+                                            ),
                                             WidgetSpan(
                                                 child: BoxedIcon(
                                               WeatherIcons.thermometer,
@@ -736,7 +727,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                               .start,
                                                       children: <Widget>[
                                                         Container(
-                                                          width: _width * 0.2,
+                                                          width: width * 0.2,
                                                           child: Text(
                                                             "UV-Index",
                                                             maxLines: 1,
@@ -783,7 +774,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                               .start,
                                                       children: <Widget>[
                                                         Container(
-                                                          width: _width * 0.2,
+                                                          width: width * 0.2,
                                                           child: Text(
                                                             "Windgeschwindigkeit",
                                                             maxLines: 1,
@@ -826,7 +817,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                               .start,
                                                       children: <Widget>[
                                                         Container(
-                                                          width: _width * 0.2,
+                                                          width: width * 0.2,
                                                           child: Text(
                                                             "Sonnenaufgang",
                                                             maxLines: 1,
@@ -876,7 +867,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                               .start,
                                                       children: <Widget>[
                                                         Container(
-                                                          width: _width * 0.2,
+                                                          width: width * 0.2,
                                                           child: Text(
                                                             "Bewölkung",
                                                             maxLines: 1,
@@ -922,7 +913,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                               .start,
                                                       children: <Widget>[
                                                         Container(
-                                                          width: _width * 0.2,
+                                                          width: width * 0.2,
                                                           child: Text(
                                                             "Luftdruck",
                                                             maxLines: 1,
@@ -965,7 +956,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                               .start,
                                                       children: <Widget>[
                                                         Container(
-                                                          width: _width * 0.2,
+                                                          width: width * 0.2,
                                                           child: Text(
                                                             "Sonnenuntergang",
                                                             maxLines: 1,
@@ -1018,13 +1009,5 @@ class _WeatherPageState extends State<WeatherPage> {
         },
       ),
     );
-  }
-}
-
-class DisableGlow extends ScrollBehavior {
-  @override
-  Widget buildViewportChrome(
-      BuildContext context, Widget child, AxisDirection axisDirection) {
-    return child;
   }
 }

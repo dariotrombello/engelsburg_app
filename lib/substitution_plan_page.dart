@@ -7,15 +7,13 @@ import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
-class VertretungsplanPage extends StatefulWidget {
+class SubstitutionPlanPage extends StatefulWidget {
   @override
-  VertretungsplanPageState createState() => VertretungsplanPageState();
+  SubstitutionPlanPageState createState() => SubstitutionPlanPageState();
 }
 
-class VertretungsplanPageState extends State<VertretungsplanPage>
-    with
-        AutomaticKeepAliveClientMixin<VertretungsplanPage>,
-        SingleTickerProviderStateMixin {
+class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
+    with SingleTickerProviderStateMixin {
   bool _isLoggedIn = false;
   bool _noSubstitutionsAvailable = false;
   bool _wrongPassword = false;
@@ -134,28 +132,23 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    double _displayHeight = MediaQuery.of(context).size.height;
+    final double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: _isLoggedIn
           ? TabBar(
+              // TEMP: Umgehung eines Bugs, der im hellen Modus der App auftritt
+              labelColor: Theme.of(context).textTheme.bodyText1.color,
               controller: _tabController,
               tabs: <Widget>[
                 Tab(
-                  // TEMP: Umgehung eines Bugs, der im hellen Modus der App auftritt
                   child: Text(
                     "Vertretungsplan",
-                    style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyText2.color),
                   ),
                 ),
                 Tab(
-                  // TEMP: Umgehung eines Bugs, der im hellen Modus der App auftritt
                   child: Text(
                     "Nachrichten",
-                    style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyText2.color),
                   ),
                 ),
               ],
@@ -179,24 +172,23 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                     Padding(
                       padding: EdgeInsets.all(16.0),
                       child: Image.asset(
-                        "assets/applogo.png",
-                        height: _displayHeight * 0.2,
+                        "assets/images/applogo.png",
+                        height: 128.0,
                       ),
                     ),
                     Text(
                       "Willkommen beim Vertretungsplan\n",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: _displayHeight * 0.05,
+                        fontSize: 32.0,
                       ),
                     ),
                     RichText(
                       text: TextSpan(
                         style: TextStyle(
-                            fontSize: _displayHeight * 0.02,
-                            color: Theme.of(context).textTheme.bodyText2.color),
+                            color: Theme.of(context).textTheme.bodyText1.color),
                         text:
-                            "Um sich anzumelden, wird das Passwort benötigt, das auch für den Vertretungsplan auf der Internetseite der Engelsburg verwendet wird. Es steht derzeit auch auf Werbezetteln, die an der ganzen Schule an den Eingangstüren hängen. Falls Sie es nicht finden können, sprechen Sie mich in der Schule an oder schreiben Sie mir eine E-Mail mit Nachweis als Schüler/Lehrer an ",
+                            "Um sich anzumelden, wird das Passwort benötigt, das auch für den Vertretungsplan auf der Internetseite der Engelsburg verwendet wird. Falls Sie es nicht finden können, sprechen Sie mich in der Schule an oder schreiben Sie mir eine E-Mail mit Nachweis als Schüler/Lehrer an ",
                         children: <TextSpan>[
                           TextSpan(
                               text: "info@dariotrombello.it",
@@ -239,12 +231,12 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                           children: <Widget>[
                             Icon(
                               Icons.person,
-                              size: _displayHeight * 0.1,
+                              size: 64.0,
                             ),
                             Text(
                               "Lehrer",
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: _displayHeight * 0.04),
+                              style: TextStyle(fontSize: 32.0),
                             )
                           ],
                         ),
@@ -268,12 +260,12 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                           children: <Widget>[
                             Icon(
                               Icons.school,
-                              size: _displayHeight * 0.1,
+                              size: 64.0,
                             ),
                             Text(
                               "Schüler",
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: _displayHeight * 0.04),
+                              style: TextStyle(fontSize: 32.0),
                             )
                           ],
                         ),
@@ -350,7 +342,8 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                   items: _allClasses
                                       .map((String item) =>
                                           DropdownMenuItem<String>(
-                                              value: item, child: Text(item)))
+                                              value: item,
+                                              child: Text(item.toString())))
                                       .toList(),
                                   onChanged: (value) => setState(() {
                                     _substitutionFilter = value;
@@ -364,7 +357,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                       ),
                       SizedBox(
                         height: 60,
-                        width: MediaQuery.of(context).size.width,
+                        width: width,
                         child: RaisedButton(
                           child: Text("EINLOGGEN"),
                           onPressed: () => _input == _password
@@ -455,14 +448,14 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                _dayList[index],
+                                _dayList[index].toString(),
                                 style: const TextStyle(fontSize: 20),
                               ),
                             ),
                           ),
                           _noSubstitutionsAvailable
                               ? SizedBox(
-                                  width: MediaQuery.of(context).size.width,
+                                  width: width,
                                   child: Card(
                                     child: Padding(
                                       padding: const EdgeInsets.all(18.0),
@@ -556,7 +549,8 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                                     children: [
                                                       ListTile(
                                                           leading: Text(
-                                                            _hours[index2],
+                                                            _hours[index2]
+                                                                .toString(),
                                                             style: TextStyle(
                                                                 fontSize: 28.0,
                                                                 color: Colors
@@ -564,7 +558,8 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                                           ),
                                                           title: Text(
                                                             _substitutionTypes[
-                                                                index2],
+                                                                    index2]
+                                                                .toString(),
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .white),
@@ -577,39 +572,40 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                                                       color: Colors
                                                                           .white70),
                                                                   text: _classes[
-                                                                      index2],
+                                                                          index2]
+                                                                      .toString(),
                                                                   children: <
                                                                       TextSpan>[
                                                                     TextSpan(
-                                                                        text: _subjects[index2].isEmpty ||
-                                                                                _classes[index2].isEmpty
+                                                                        text: _subjects[index2].toString().isEmpty ||
+                                                                                _classes[index2].toString().isEmpty
                                                                             ? ""
                                                                             : " – "),
                                                                     TextSpan(
-                                                                        text: _subjects[
-                                                                            index2]),
+                                                                        text: _subjects[index2]
+                                                                            .toString()),
                                                                     TextSpan(
-                                                                        text: _substitutionTeachers[index2].isEmpty
+                                                                        text: _substitutionTeachers[index2].toString().isEmpty
                                                                             ? ""
                                                                             : " (${_substitutionTeachers[index2]}"),
                                                                     TextSpan(
-                                                                        text: _substitutionTeachers[index2].isNotEmpty &&
-                                                                                _teachers[index2].isEmpty
+                                                                        text: _substitutionTeachers[index2].toString().isNotEmpty &&
+                                                                                _teachers[index2].toString().isEmpty
                                                                             ? ")"
                                                                             : ""),
                                                                     TextSpan(
-                                                                        text: _substitutionTeachers[index2].isNotEmpty &&
-                                                                                _teachers[index2].isNotEmpty &&
-                                                                                _substitutionTeachers[index2] != _teachers[index2]
+                                                                        text: _substitutionTeachers[index2].toString().isNotEmpty &&
+                                                                                _teachers[index2].toString().isNotEmpty &&
+                                                                                _substitutionTeachers[index2].toString() != _teachers[index2].toString()
                                                                             ? " statt "
                                                                             : ""),
                                                                     TextSpan(
-                                                                        text: _substitutionTeachers[index2].isEmpty &&
-                                                                                _teachers[index2].isNotEmpty
+                                                                        text: _substitutionTeachers[index2].toString().isEmpty &&
+                                                                                _teachers[index2].toString().isNotEmpty
                                                                             ? " ("
                                                                             : ""),
                                                                     TextSpan(
-                                                                        text: _teachers[index2] == _substitutionTeachers[index2]
+                                                                        text: _teachers[index2].toString() == _substitutionTeachers[index2].toString()
                                                                             ? ""
                                                                             : _teachers[
                                                                                 index2],
@@ -619,22 +615,22 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                                                               TextDecoration.lineThrough,
                                                                         )),
                                                                     TextSpan(
-                                                                        text: _teachers[index2].isNotEmpty
+                                                                        text: _teachers[index2].toString().isNotEmpty
                                                                             ? ")"
                                                                             : ""),
                                                                     TextSpan(
-                                                                        text: _rooms[index2].isEmpty
+                                                                        text: _rooms[index2].toString().isEmpty
                                                                             ? ""
                                                                             : " in " +
                                                                                 _rooms[index2]),
                                                                     TextSpan(
-                                                                        text: _substitutionInformation[index2].isEmpty
+                                                                        text: _substitutionInformation[index2].toString().isEmpty
                                                                             ? ""
-                                                                            : " – ${_substitutionInformation[index2]}"),
+                                                                            : " – ${_substitutionInformation[index2].toString()}"),
                                                                     TextSpan(
-                                                                        text: _substitutionSpan[index2].isEmpty
+                                                                        text: _substitutionSpan[index2].toString().isEmpty
                                                                             ? ""
-                                                                            : " – ${_substitutionSpan[index2]}")
+                                                                            : " – ${_substitutionSpan[index2].toString()}")
                                                                   ],
                                                                 ),
                                                               ),
@@ -650,7 +646,8 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                             ? Padding(
                                                 padding:
                                                     const EdgeInsets.all(6.0),
-                                                child: Text(_lastChanged))
+                                                child: Text(
+                                                    _lastChanged.toString()))
                                             : Container()
                                       ],
                                     );
@@ -674,7 +671,7 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                _dayList[index],
+                                _dayList[index].toString(),
                                 style: TextStyle(fontSize: 20),
                               ),
                             ),
@@ -699,8 +696,8 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                     child: Padding(
                                       padding: const EdgeInsets.all(16.0),
                                       child: Text(
-                                        _news[index2],
-                                        style: TextStyle(fontSize: 18),
+                                        _news[index2].toString(),
+                                        style: TextStyle(fontSize: 16.0),
                                       ),
                                     ),
                                   ),
@@ -714,7 +711,8 @@ class VertretungsplanPageState extends State<VertretungsplanPage>
                                           child: Padding(
                                               padding:
                                                   const EdgeInsets.all(6.0),
-                                              child: Text(_lastChanged)))
+                                              child: Text(
+                                                  _lastChanged.toString())))
                                       : Container()
                                 ],
                               );

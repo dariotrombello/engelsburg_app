@@ -4,8 +4,6 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart';
 
-import 'main.dart';
-
 class SolarPanelPage extends StatefulWidget {
   @override
   _SolarPanelPageState createState() => _SolarPanelPageState();
@@ -54,9 +52,9 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: EngelsburgAppBar(
-        title: "Daten der Solaranlage",
-        withBackButton: true,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("Daten der Solaranlage"),
       ),
       body: FutureBuilder(
         future: _getSolarPanelData(),

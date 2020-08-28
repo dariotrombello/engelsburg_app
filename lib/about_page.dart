@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
-import 'main.dart';
-import 'schoolinfo_page.dart';
+import 'about_school_page.dart';
 
 class AboutPage extends StatefulWidget {
   @override
@@ -12,47 +11,47 @@ class AboutPage extends StatefulWidget {
 }
 
 class _AboutPageState extends State<AboutPage> {
-  // Die Strings werden geändert, wenn PackageInfo die Daten der App geladen hat.
-  String appName = "";
-  String packageName = "";
-  String version = "";
   // Notiz, dass die App nicht von der Schule ist, MUSS erhalten bleiben.
   final String appDescription =
-      "Eine App von Dario Trombello (Klasse 10d), die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.";
+      "Eine App von Dario Trombello (Kurs E1EngT1-CAW), die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.";
 
-  void initializePackageInfo() {
-    PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
-      setState(() {
-        appName = packageInfo.appName;
-        packageName = packageInfo.packageName;
-        version = packageInfo.version;
-      });
+  // Die Strings werden geändert, wenn PackageInfo die Daten der App geladen hat.
+  PackageInfo _packageInfo = PackageInfo(
+    appName: 'Engelsburg-App',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+  );
+
+  Future<void> _initPackageInfo() async {
+    final PackageInfo info = await PackageInfo.fromPlatform();
+    setState(() {
+      _packageInfo = info;
     });
   }
 
   void initState() {
     super.initState();
-    initializePackageInfo();
+    _initPackageInfo();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: EngelsburgAppBar(
-        title: "Über",
-        withBackButton: true,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("Über"),
       ),
       body: ListView(
         children: <Widget>[
           ListTile(
-            leading: Image.asset("assets/applogo.png"),
+            leading: Image.asset("assets/images/applogo.png"),
             title: Text(
-              appName,
+              _packageInfo.appName,
             ),
             subtitle: Text(
-              version,
+              _packageInfo.version,
             ),
-            trailing: IconButton(icon: Icon(Icons.info), onPressed: null),
           ),
           ListTile(
             title: Text(
@@ -88,7 +87,24 @@ class _AboutPageState extends State<AboutPage> {
             title: Text(
               'Schreibe mir eine E-Mail',
             ),
-            onTap: () => url_launcher.launch("mailto:mail@dariotrombello.it"),
+            onTap: () => url_launcher.launch("mailto:info@dariotrombello.it"),
+          ),
+          ListTile(
+            leading: Icon(Icons.info),
+            title: Text(
+              'Open-Source-Lizenzen',
+            ),
+            onTap: () => showLicensePage(
+                applicationIcon: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Image.asset(
+                    "assets/images/applogo.png",
+                    height: 64.0,
+                  ),
+                ),
+                applicationName: _packageInfo.appName,
+                applicationVersion: _packageInfo.version,
+                context: context),
           ),
           Divider(),
           ListTile(
@@ -97,7 +113,7 @@ class _AboutPageState extends State<AboutPage> {
               'Über die Schule',
             ),
             onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (context) => SchoolInfoPage())),
+                MaterialPageRoute(builder: (context) => AboutSchoolPage())),
           ),
         ],
       ),

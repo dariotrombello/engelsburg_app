@@ -10,9 +10,16 @@ class CafeteriaPage extends StatefulWidget {
   _CafeteriaPageState createState() => _CafeteriaPageState();
 }
 
-class _CafeteriaPageState extends State<CafeteriaPage>
-    with AutomaticKeepAliveClientMixin<CafeteriaPage> {
-  Future<List<String>> _getCafeteriaPlan() async {
+class _CafeteriaPageState extends State<CafeteriaPage> {
+  Future _getCafeteriaPlan;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCafeteriaPlan = _getCafeteriaPlanInit();
+  }
+
+  Future<List<String>> _getCafeteriaPlanInit() async {
     final List<String> _cafeteriaDetailList = [];
     final Response content = await Client()
         .get('https://engelsburg.smmp.de/leben-an-der-schule/cafeteria/');
@@ -33,20 +40,19 @@ class _CafeteriaPageState extends State<CafeteriaPage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return FutureBuilder(
-      future: _getCafeteriaPlan(),
+      future: _getCafeteriaPlan,
       builder: (context, snapshot) {
         if (snapshot.hasData)
           return RefreshIndicator(
-            onRefresh: () => _getCafeteriaPlan(),
+            onRefresh: () => _getCafeteriaPlan = _getCafeteriaPlanInit(),
             child: ListView(
               padding: EdgeInsets.only(top: 16.0),
               children: <Widget>[
                 Padding(
                     padding: EdgeInsets.only(bottom: 16.0),
                     child: Center(
-                        child: Text(snapshot.data[0],
+                        child: Text(snapshot.data[0].toString(),
                             style: TextStyle(fontWeight: FontWeight.w700)))),
                 ListView.builder(
                   itemCount: snapshot.data.length - 1,
@@ -60,7 +66,7 @@ class _CafeteriaPageState extends State<CafeteriaPage>
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
                         child: Text(
-                          snapshot.data.sublist(1)[index],
+                          snapshot.data.sublist(1)[index].toString(),
                         ),
                       ),
                     );

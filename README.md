@@ -28,7 +28,7 @@ keyPassword=<Passwort vom vorherigen Schritt>
 keyAlias=key
 storeFile=<Pfad der Keystore-Datei. Beispiel: C:/Users/<Benutzername>/key.jks>
 ```
-ACHTUNG: Veröffentliche beide Dateien unter keinen Umständen! Wenn du einen Pull-Request einreichst oder diese Repository woanders über Git hochlädst, werden diese Dateien automatisch vom Hochladen ausgenommen.
+ACHTUNG: Veröffentliche beide Dateien unter keinen Umständen! Wenn du einen Pull-Request einreichst oder diese Repository woanders über Git hochlädst, wird die Datei key.properties automatisch vom Hochladen ausgenommen.
 
 
 ## License

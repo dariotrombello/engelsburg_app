@@ -4,9 +4,7 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart';
 
-import 'main.dart';
-
-class TerminePage extends StatelessWidget {
+class EventsPage extends StatelessWidget {
   Future _getTermine() async {
     final List<String> _termineStringList = [];
     final Response termine =
@@ -23,14 +21,14 @@ class TerminePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: EngelsburgAppBar(
-        title: 'Termine',
-        withBackButton: true,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("Termine"),
       ),
       body: FutureBuilder(
         future: _getTermine(),
         builder: (context, snapshot) {
-          if (snapshot.hasData)
+          if (snapshot.hasData && snapshot.data.isNotEmpty) {
             return RefreshIndicator(
               onRefresh: () => _getTermine(),
               child: ListView.builder(
@@ -44,7 +42,7 @@ class TerminePage extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: Text(
-                            snapshot.data[index].substring(0, 10),
+                            snapshot.data[index].toString().substring(0, 10),
                             style: TextStyle(fontSize: 20),
                           ),
                         ),
@@ -52,7 +50,7 @@ class TerminePage extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(left: 5.0),
                         child: Text(
-                          snapshot.data[index].substring(12),
+                          snapshot.data[index].toString().substring(12),
                           style: TextStyle(fontSize: 16),
                         ),
                       ),
@@ -64,6 +62,31 @@ class TerminePage extends StatelessWidget {
                 },
               ),
             );
+          } else if (snapshot.hasData && snapshot.data.isEmpty) {
+            return Card(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Icon(
+                      Icons.watch_later,
+                      size: 64.0,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Text(
+                        "Aktuell keine Termine",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 18.0),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          }
           return Center(child: CircularProgressIndicator());
         },
       ),

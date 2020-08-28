@@ -1,39 +1,36 @@
+import 'package:engelsburg_app/model/wordpress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/style.dart';
 
-import 'dart:async';
-
 import 'package:html_unescape/html_unescape.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_wordpress/flutter_wordpress.dart' as wp;
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
-
-import 'main.dart';
+import 'package:http/http.dart' as http;
 
 class NewsPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => NewsPageState();
 }
 
-class NewsPageState extends State<NewsPage>
-    with AutomaticKeepAliveClientMixin<NewsPage> {
-  static wp.WordPress _wordPress =
-      wp.WordPress(baseUrl: 'https://engelsburg.smmp.de');
-  final Future<List<wp.Post>> _fetchPosts = _wordPress.fetchPosts(
-    postParams: wp.ParamsPostList(
-      context: wp.WordPressContext.view,
-      pageNum: 1,
-      perPage: 20,
-      order: wp.Order.desc,
-      orderBy: wp.PostOrderBy.date,
-    ),
-    /* fetchFeaturedMedia: true */
-  );
+class NewsPageState extends State<NewsPage> {
+  Future _getNews;
+  Future<http.Response> _getNewsInit() {
+    return http.get(
+        "https://engelsburg.smmp.de/wp-json/wp/v2/posts?per_page=25&_embed");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getNews = _getNewsInit();
+  }
 
   Widget _buildPostCard({
     final String content,
+    final DateTime date,
+    final String featuredMedia,
     final String title,
-    /* wp.Media featuredMedia */
   }) {
     final String renderedContent = HtmlUnescape()
         .convert(content)
@@ -46,34 +43,41 @@ class NewsPageState extends State<NewsPage>
         borderRadius: BorderRadius.circular(4.0),
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  NewsPageIndepth(renderedTitle, content)));
+            builder: (BuildContext context) => NewsDetailPage(
+                content: content,
+                date: date,
+                featuredMedia: featuredMedia,
+                title: renderedTitle),
+          ));
         },
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /* if (featuredMedia.mediaDetails.sizes.mediumLarge.sourceUrl !=
-                  null)
-                Image.network(
-                    featuredMedia.mediaDetails.sizes.mediumLarge.sourceUrl), */
-              Text(
-                renderedTitle,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (featuredMedia != null)
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(4.0),
+                    topRight: Radius.circular(4.0)),
+                child: Image.network(featuredMedia),
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+              child: Text(
+                renderedTitle.toString(),
                 style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18.0),
               ),
-              Padding(
-                padding: EdgeInsets.only(top: 8.0),
-                child: Text(
-                  renderedContent,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(height: 1.5),
-                ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                renderedContent.toString(),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(height: 1.5),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -81,24 +85,31 @@ class NewsPageState extends State<NewsPage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    return FutureBuilder<List<wp.Post>>(
-      future: _fetchPosts,
+    return FutureBuilder<http.Response>(
+      future: _getNews,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          List<Post> posts = snapshot.data.body == null
+              ? List()
+              : postFromJson(snapshot.data.body);
           return RefreshIndicator(
-            onRefresh: () => _fetchPosts,
+            onRefresh: () => _getNews = _getNewsInit(),
             child: ListView.builder(
-              itemCount: snapshot.data.length,
+              padding: EdgeInsets.all(16.0),
+              itemCount: posts.length,
               itemBuilder: (context, index) {
-                final String title = snapshot.data[index].title.rendered;
-                final String content = snapshot.data[index].content.rendered;
-                /* final wp.Media featuredMedia =
-                    snapshot.data[index].featuredMedia; */
+                final String content =
+                    posts[index]?.content?.rendered.toString();
+                final DateTime date = posts[index]?.date;
+                final String featuredMedia =
+                    posts[index]?.embedded?.wpFeaturedmedia?.first?.sourceUrl;
+                final String title = posts[index]?.title?.rendered.toString();
+
                 return _buildPostCard(
-                  title: title,
                   content: content,
-                  /* featuredMedia: featuredMedia */
+                  date: date,
+                  featuredMedia: featuredMedia,
+                  title: title,
                 );
               },
             ),
@@ -115,38 +126,57 @@ class NewsPageState extends State<NewsPage>
   bool get wantKeepAlive => true;
 }
 
-class NewsPageIndepth extends StatelessWidget {
-  final content;
-  final title;
-  NewsPageIndepth(this.title, this.content);
+class NewsDetailPage extends StatelessWidget {
+  final String content;
+  final DateTime date;
+  final String featuredMedia;
+  final String title;
+  NewsDetailPage({
+    @required this.content,
+    this.date,
+    this.featuredMedia,
+    @required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: EngelsburgAppBar(
-        title: "News",
-        withBackButton: true,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("News"),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
         children: <Widget>[
+          if (featuredMedia != null) Image.network(featuredMedia),
           Padding(
-            padding: EdgeInsets.only(bottom: 16.0),
+            padding: EdgeInsets.all(16.0),
             child: Text(
               title,
               style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
             ),
           ),
-          Divider(),
-          Html(
-            style: {
-              "html": Style.fromTextStyle(
-                TextStyle(
-                    fontFamily: "Montserrat", fontSize: 16.0, height: 1.5),
+          if (date != null)
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
+              child: Text(
+                DateFormat("dd.MM.yyyy, HH:mm").format(date),
+                style: TextStyle(
+                    color: Theme.of(context).textTheme.headline1.color),
               ),
-            },
-            onLinkTap: (link) => url_launcher.launch(link),
-            data: content,
+            ),
+          Divider(),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Html(
+              style: {
+                "html": Style.fromTextStyle(
+                  TextStyle(
+                      fontSize: 16.0, height: 1.5, fontFamily: "Roboto Slab"),
+                ),
+              },
+              onLinkTap: (link) => url_launcher.launch(link),
+              data: content,
+            ),
           )
         ],
       ),

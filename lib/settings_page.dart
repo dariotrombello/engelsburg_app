@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'main.dart';
-
 class SettingsPage extends StatefulWidget {
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -51,7 +49,10 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: EngelsburgAppBar(title: "Einstellungen", withBackButton: true),
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("Einstellungen"),
+      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: FutureBuilder(
