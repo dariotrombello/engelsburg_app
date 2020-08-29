@@ -47,15 +47,15 @@ class _AboutPageState extends State<AboutPage> {
           ListTile(
             leading: Image.asset("assets/images/applogo.png"),
             title: Text(
-              _packageInfo.appName,
+              _packageInfo.appName.toString(),
             ),
             subtitle: Text(
-              _packageInfo.version,
+              _packageInfo.version.toString(),
             ),
           ),
           ListTile(
             title: Text(
-              appDescription,
+              appDescription.toString(),
             ),
           ),
           Divider(),
@@ -102,8 +102,8 @@ class _AboutPageState extends State<AboutPage> {
                     height: 64.0,
                   ),
                 ),
-                applicationName: _packageInfo.appName,
-                applicationVersion: _packageInfo.version,
+                applicationName: _packageInfo.appName.toString(),
+                applicationVersion: _packageInfo.version.toString(),
                 context: context),
           ),
           Divider(),

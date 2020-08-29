@@ -79,7 +79,4 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
       },
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

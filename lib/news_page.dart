@@ -17,7 +17,7 @@ class NewsPageState extends State<NewsPage> {
   Future _getNews;
   Future<http.Response> _getNewsInit() {
     return http.get(
-        "https://engelsburg.smmp.de/wp-json/wp/v2/posts?per_page=25&_embed");
+        "https://engelsburg.smmp.de/wp-json/wp/v2/posts?per_page=30&_embed");
   }
 
   @override
@@ -121,9 +121,6 @@ class NewsPageState extends State<NewsPage> {
       },
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class NewsDetailPage extends StatelessWidget {

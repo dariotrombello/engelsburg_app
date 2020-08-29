@@ -730,7 +730,4 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
       ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

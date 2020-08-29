@@ -1,6 +1,6 @@
 name: engelsburg_app
 description: Eine App von Dario Trombello, die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.
-version: 1.4.0+10
+version: 1.4.1+11
 
 environment:
   sdk: ">=2.7.0 <3.0.0"

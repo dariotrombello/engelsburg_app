@@ -540,7 +540,7 @@ class WeatherPage extends StatelessWidget {
                               padding: EdgeInsets.only(top: 24.0),
                             ),
                             SizedBox(
-                              height: 88,
+                              height: 90,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: snapshot.data.hourly.data.length,

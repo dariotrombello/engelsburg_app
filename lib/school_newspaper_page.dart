@@ -69,7 +69,4 @@ class _SchoolNewspaperPageState extends State<SchoolNewspaperPage> {
       },
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

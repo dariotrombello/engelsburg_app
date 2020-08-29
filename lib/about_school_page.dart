@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -22,17 +24,14 @@ class AboutSchoolPage extends StatelessWidget {
             child: Image.asset("assets/images/school.jpg"),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 16.0),
+            padding: const EdgeInsets.only(top: 32.0, bottom: 8.0),
+            child: Text(
+              "Info",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),
+            ),
           ),
           Text(
               "Das Engelsburg-Gymnasium ist ein staatlich anerkanntes katholisches Gymnasium in Trägerschaft des Ordens der Schwestern der heiligen Maria Magdalena Postel (SMMP). Es ist ausgezeichnet mit dem Gütesiegel „Hochbegabtenförderung“ des Landes Hessen. An der Schule werden die Schulformen G8 und G9 parallel unterrichtet."),
-          Padding(
-            padding: const EdgeInsets.only(top: 32.0, bottom: 8.0),
-            child: Text("Info",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0)),
-          ),
-          Text(
-              "Schulform: Gymnasium\nGründung: 1892\nAdresse: Richardweg 3, 34117 Kassel\nStadt: Kassel\nLand: Hessen\nTräger: Schwestern der hl. Maria Magdalena Postel\nSchüler: 1070\nLehrkräfte: 85\nSchulleitung: Thorsten Prinz, Dr. Monika Rack"),
           RichText(
               text: TextSpan(
                   text: "Quelle: ",
@@ -40,12 +39,12 @@ class AboutSchoolPage extends StatelessWidget {
                       color: Theme.of(context).textTheme.bodyText1.color),
                   children: [
                 TextSpan(
-                    text: "wikipedia.org",
+                    text: "kassel.de",
                     style: TextStyle(color: Colors.blue),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         url_launcher.launch(
-                            "https://de.wikipedia.org/wiki/Engelsburg-Gymnasium");
+                            "https://www1.kassel.de/verzeichnisse/schulen/gymnasiale-oberstufen-und-gymnasien/engelsburg.php");
                       })
               ])),
           Padding(
@@ -60,16 +59,19 @@ class AboutSchoolPage extends StatelessWidget {
             child: SizedBox(
               height: 250,
               child: GoogleMap(
+                myLocationButtonEnabled: false,
+                liteModeEnabled: Platform.isAndroid,
                 initialCameraPosition:
                     CameraPosition(target: _engelsburgPosition, zoom: 14.0),
-                liteModeEnabled: true,
                 markers: {
                   Marker(
-                      markerId: MarkerId("0"),
-                      position: _engelsburgPosition,
-                      infoWindow: InfoWindow(
-                          title: "Engelsburg-Gymnasium",
-                          snippet: "Richardweg 3, 34117 Kassel"))
+                    markerId: MarkerId("0"),
+                    position: _engelsburgPosition,
+                    infoWindow: InfoWindow(
+                      title: "Engelsburg-Gymnasium",
+                      snippet: "Richardweg 3, 34117 Kassel",
+                    ),
+                  ),
                 },
               ),
             ),
