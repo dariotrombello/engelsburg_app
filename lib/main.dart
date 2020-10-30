@@ -13,8 +13,12 @@ import 'weather_page.dart';
 void main() {
   runApp(MaterialApp(
     home: EngelsburgApp(),
-    theme: ThemeData.light(),
-    darkTheme: ThemeData.dark(),
+    theme: ThemeData.light().copyWith(
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+    ),
+    darkTheme: ThemeData.dark().copyWith(
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+    ),
   ));
 }
 
@@ -48,19 +52,19 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
                   Align(
                       alignment: Alignment.topLeft,
                       child: Image.asset(
-                        "assets/images/applogo.png",
+                        'assets/images/applogo.png',
                         height: 72,
                       )),
                   Align(
                       alignment: Alignment.bottomLeft,
-                      child: Text("Engelsburg-App"))
+                      child: Text('Engelsburg-App'))
                 ]),
               ),
             ),
             ListTile(
               leading: Icon(Icons.wb_sunny),
               title: Text(
-                "Daten der Solaranlage",
+                'Daten der Solaranlage',
               ),
               onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => SolarPanelPage())),
@@ -68,7 +72,7 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
             ListTile(
               leading: Icon(Icons.watch_later),
               title: Text(
-                "Termine",
+                'Termine',
               ),
               onTap: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => EventsPage())),
@@ -76,7 +80,7 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
             ListTile(
               leading: Icon(Icons.cloud),
               title: Text(
-                "Wetter",
+                'Wetter',
               ),
               onTap: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => WeatherPage())),
@@ -85,7 +89,7 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
             ListTile(
               leading: Icon(Icons.settings),
               title: Text(
-                "Einstellungen",
+                'Einstellungen',
               ),
               onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => SettingsPage())),
@@ -101,7 +105,7 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
                   .push(MaterialPageRoute(builder: (context) => AboutPage())))
         ],
         centerTitle: true,
-        title: Text("Engelsburg-App"),
+        title: Text('Engelsburg-App'),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -114,19 +118,19 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
           BottomNavigationBarItem(
               activeIcon: Icon(Icons.library_books),
               icon: Icon(Icons.library_books),
-              title: Text('News')),
+              label: 'News'),
           BottomNavigationBarItem(
               activeIcon: Icon(Icons.local_dining),
               icon: Icon(Icons.local_dining),
-              title: Text('Cafeteria')),
+              label: 'Cafeteria'),
           BottomNavigationBarItem(
               activeIcon: Icon(Icons.import_contacts),
               icon: Icon(Icons.import_contacts),
-              title: Text('Schülerzeitung')),
+              label: 'Schülerzeitung'),
           BottomNavigationBarItem(
               activeIcon: Icon(Icons.dashboard),
               icon: Icon(Icons.dashboard),
-              title: Text('Vertretungsplan')),
+              label: 'Vertretungsplan'),
         ],
       ),
     );

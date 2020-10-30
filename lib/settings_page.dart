@@ -13,7 +13,7 @@ class _SettingsPageState extends State<SettingsPage> {
   List<String> _allClasses = [];
   SharedPreferences _prefs;
   Future _getSettings;
-  TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
 
   @override
   void initState() {
@@ -23,27 +23,27 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future _getSettingsInit() async {
     _prefs = await SharedPreferences.getInstance();
-    if (_prefs.getStringList('allClasses') != null)
+    if (_prefs.getStringList('allClasses') != null) {
       _allClasses = _prefs.getStringList('allClasses');
-    else {
-      final Response navbar = await Client().get(Uri.encodeFull(
+    } else {
+      final navbar = await Client().get(Uri.encodeFull(
           'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/frames/navbar.htm'));
 
       // Klassenliste aus dem Javascript-Element der Seite in eine List<String> konvertieren
       _allClasses = navbar.body
           .substring(
-              navbar.body.indexOf("var classes = ["), navbar.body.indexOf("];"))
+              navbar.body.indexOf('var classes = ['), navbar.body.indexOf('];'))
           .trim()
-          .replaceFirst("var classes = [", "")
-          .replaceFirst("];", "")
-          .replaceAll("\"", "")
-          .split(",");
-      _allClasses.insert(0, "Alle Klassen anzeigen");
-      _prefs.setStringList('allClasses', _allClasses);
+          .replaceFirst('var classes = [', '')
+          .replaceFirst('];', '')
+          .replaceAll('\"', '')
+          .split(',');
+      _allClasses.insert(0, 'Alle Klassen anzeigen');
+      await _prefs.setStringList('allClasses', _allClasses);
     }
     _prefs.getBool('teacherSelected') ?? false
         ? _textEditingController.text = _prefs.getString('substitutionFilter')
-        : _textEditingController.text = "ARE";
+        : _textEditingController.text = 'ARE';
   }
 
   @override
@@ -51,7 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Einstellungen"),
+        title: Text('Einstellungen'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -59,18 +59,17 @@ class _SettingsPageState extends State<SettingsPage> {
           future: _getSettings,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
-              String _selected = _prefs.getString('substitutionFilter');
-              bool _teacherSelected =
-                  _prefs.getBool('teacherSelected') ?? false;
-              bool _isFiltered =
-                  _selected != "Alle Klassen anzeigen" && _selected != null;
+              var _selected = _prefs.getString('substitutionFilter');
+              var _teacherSelected = _prefs.getBool('teacherSelected') ?? false;
+              var _isFiltered =
+                  _selected != 'Alle Klassen anzeigen' && _selected != null;
 
               return ListView(
                 children: <Widget>[
-                  Text("Vertretungsplan"),
+                  Text('Vertretungsplan'),
                   RadioListTile(
-                      title: const Text("Alle Klassen anzeigen"),
-                      value: "Alle Klassen anzeigen",
+                      title: const Text('Alle Klassen anzeigen'),
+                      value: 'Alle Klassen anzeigen',
                       groupValue: _selected,
                       onChanged: (value) {
                         _prefs.setString('substitutionFilter', value);
@@ -78,7 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         setState(() => _substitutionSettingsChanged = true);
                       }),
                   RadioListTile(
-                      title: const Text("Nach Klasse filtern"),
+                      title: const Text('Nach Klasse filtern'),
                       value: _allClasses.sublist(1).contains(_selected)
                           ? _selected
                           : _allClasses[1],
@@ -89,13 +88,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         setState(() => _substitutionSettingsChanged = true);
                       }),
                   RadioListTile(
-                      title: const Text("Nach Lehrer filtern"),
-                      value: _teacherSelected ? _selected : "ARE",
+                      title: const Text('Nach Lehrer filtern'),
+                      value: _teacherSelected ? _selected : 'ARE',
                       groupValue: _selected,
                       onChanged: (value) {
                         _teacherSelected
                             ? _textEditingController.text = _selected
-                            : _textEditingController.text = "ARE";
+                            : _textEditingController.text = 'ARE';
                         _prefs.setString('substitutionFilter', value);
                         _prefs.setBool('teacherSelected', true);
                         setState(() => _substitutionSettingsChanged = true);
@@ -161,7 +160,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ),
                                   Flexible(
                                     child: Text(
-                                      "Nach Änderung der Einstellungen für den Vertretungsplan ist ein Neustart der App notwendig.",
+                                      'Nach Änderung der Einstellungen für den Vertretungsplan ist ein Neustart der App notwendig.',
                                     ),
                                   ),
                                 ],
@@ -172,8 +171,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       : Container()
                 ],
               );
-            } else
+            } else {
               return Container();
+            }
           },
         ),
       ),

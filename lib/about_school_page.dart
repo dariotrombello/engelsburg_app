@@ -14,43 +14,43 @@ class AboutSchoolPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Über die Schule"),
+        title: Text('Über die Schule'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: <Widget>[
           ClipRRect(
             borderRadius: BorderRadius.circular(4.0),
-            child: Image.asset("assets/images/school.jpg"),
+            child: Image.asset('assets/images/school.jpg'),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 32.0, bottom: 8.0),
             child: Text(
-              "Info",
+              'Info',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),
             ),
           ),
           Text(
-              "Das Engelsburg-Gymnasium ist ein staatlich anerkanntes katholisches Gymnasium in Trägerschaft des Ordens der Schwestern der heiligen Maria Magdalena Postel (SMMP). Es ist ausgezeichnet mit dem Gütesiegel „Hochbegabtenförderung“ des Landes Hessen. An der Schule werden die Schulformen G8 und G9 parallel unterrichtet."),
+              'Das Engelsburg-Gymnasium ist ein staatlich anerkanntes katholisches Gymnasium in Trägerschaft des Ordens der Schwestern der heiligen Maria Magdalena Postel (SMMP). Es ist ausgezeichnet mit dem Gütesiegel „Hochbegabtenförderung“ des Landes Hessen. An der Schule werden die Schulformen G8 und G9 parallel unterrichtet.'),
           RichText(
               text: TextSpan(
-                  text: "Quelle: ",
+                  text: 'Quelle: ',
                   style: TextStyle(
                       color: Theme.of(context).textTheme.bodyText1.color),
                   children: [
                 TextSpan(
-                    text: "kassel.de",
+                    text: 'kassel.de',
                     style: TextStyle(color: Colors.blue),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         url_launcher.launch(
-                            "https://www1.kassel.de/verzeichnisse/schulen/gymnasiale-oberstufen-und-gymnasien/engelsburg.php");
+                            'https://www1.kassel.de/verzeichnisse/schulen/gymnasiale-oberstufen-und-gymnasien/engelsburg.php');
                       })
               ])),
           Padding(
             padding: const EdgeInsets.only(top: 32.0, bottom: 8.0),
             child: Text(
-              "Standort",
+              'Standort',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),
             ),
           ),
@@ -65,11 +65,11 @@ class AboutSchoolPage extends StatelessWidget {
                     CameraPosition(target: _engelsburgPosition, zoom: 14.0),
                 markers: {
                   Marker(
-                    markerId: MarkerId("0"),
+                    markerId: MarkerId('0'),
                     position: _engelsburgPosition,
                     infoWindow: InfoWindow(
-                      title: "Engelsburg-Gymnasium",
-                      snippet: "Richardweg 3, 34117 Kassel",
+                      title: 'Engelsburg-Gymnasium',
+                      snippet: 'Richardweg 3, 34117 Kassel',
                     ),
                   ),
                 },
@@ -81,17 +81,17 @@ class AboutSchoolPage extends StatelessWidget {
           ),
           ListTile(
               leading: Icon(Icons.phone),
-              title: Text("Pforte anrufen"),
-              onTap: () => url_launcher.launch("tel:+49561789670")),
+              title: Text('Pforte anrufen'),
+              onTap: () => url_launcher.launch('tel:+49561789670')),
           ListTile(
               leading: Icon(Icons.phone),
-              title: Text("Sekretariat anrufen"),
-              onTap: () => url_launcher.launch("tel:+495617896727")),
+              title: Text('Sekretariat anrufen'),
+              onTap: () => url_launcher.launch('tel:+495617896727')),
           ListTile(
               leading: Icon(Icons.mail),
-              title: Text("E-Mail an das Sekretariat"),
+              title: Text('E-Mail an das Sekretariat'),
               onTap: () =>
-                  url_launcher.launch("mailto:sekretariat@engelsburg.smmp.de")),
+                  url_launcher.launch('mailto:sekretariat@engelsburg.smmp.de')),
         ],
       ),
     );

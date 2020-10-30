@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 
-import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart';
 
 class EventsPage extends StatelessWidget {
   Future _getTermine() async {
-    final List<String> _termineStringList = [];
-    final Response termine =
+    final termineStringList = <String>[];
+    final termine =
         await Client().get('https://engelsburg.smmp.de/organisation/termine/');
-    final dom.Document document = parse(termine.body);
-    final List<dom.Element> termineList =
-        document.querySelectorAll("div.entry-content > ul.navlist > li");
+    final document = parse(termine.body);
+    final termineList =
+        document.querySelectorAll('div.entry-content > ul.navlist > li');
     for (var termin in termineList) {
-      _termineStringList.add(termin.text);
+      termineStringList.add(termin.text);
     }
-    return _termineStringList;
+    return termineStringList;
   }
 
   @override
@@ -23,7 +22,7 @@ class EventsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Termine"),
+        title: Text('Termine'),
       ),
       body: FutureBuilder(
         future: _getTermine(),
@@ -77,7 +76,7 @@ class EventsPage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 16.0),
                       child: Text(
-                        "Aktuell keine Termine",
+                        'Aktuell keine Termine',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 18.0),
                       ),

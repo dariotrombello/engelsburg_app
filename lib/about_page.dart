@@ -13,7 +13,7 @@ class AboutPage extends StatefulWidget {
 class _AboutPageState extends State<AboutPage> {
   // Notiz, dass die App nicht von der Schule ist, MUSS erhalten bleiben.
   final String appDescription =
-      "Eine App von Dario Trombello (Kurs E1EngT1-CAW), die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.";
+      'Eine App von Dario Trombello (Kurs E1EngT1-CAW), die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.';
 
   // Die Strings werden geändert, wenn PackageInfo die Daten der App geladen hat.
   PackageInfo _packageInfo = PackageInfo(
@@ -24,12 +24,13 @@ class _AboutPageState extends State<AboutPage> {
   );
 
   Future<void> _initPackageInfo() async {
-    final PackageInfo info = await PackageInfo.fromPlatform();
+    final info = await PackageInfo.fromPlatform();
     setState(() {
       _packageInfo = info;
     });
   }
 
+  @override
   void initState() {
     super.initState();
     _initPackageInfo();
@@ -40,12 +41,12 @@ class _AboutPageState extends State<AboutPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Über"),
+        title: Text('Über'),
       ),
       body: ListView(
         children: <Widget>[
           ListTile(
-            leading: Image.asset("assets/images/applogo.png"),
+            leading: Image.asset('assets/images/applogo.png'),
             title: Text(
               _packageInfo.appName.toString(),
             ),
@@ -65,7 +66,7 @@ class _AboutPageState extends State<AboutPage> {
               'App bewerten',
             ),
             onTap: () => url_launcher.launch(
-                "https://play.google.com/store/apps/details?id=de.dariotrombello.engelsburg_app"),
+                'https://play.google.com/store/apps/details?id=de.dariotrombello.engelsburg_app'),
           ),
           ListTile(
             leading: Icon(Icons.code),
@@ -73,21 +74,21 @@ class _AboutPageState extends State<AboutPage> {
               'Quellcode auf GitHub',
             ),
             onTap: () => url_launcher
-                .launch("https://github.com/dariotrombello/engelsburg_app"),
+                .launch('https://github.com/dariotrombello/engelsburg_app'),
           ),
           ListTile(
             leading: Icon(Icons.open_in_new),
             title: Text(
               'Besuche meine Webseite',
             ),
-            onTap: () => url_launcher.launch("https://dariotrombello.it"),
+            onTap: () => url_launcher.launch('https://dariotrombello.it'),
           ),
           ListTile(
             leading: Icon(Icons.mail),
             title: Text(
               'Schreibe mir eine E-Mail',
             ),
-            onTap: () => url_launcher.launch("mailto:info@dariotrombello.it"),
+            onTap: () => url_launcher.launch('mailto:info@dariotrombello.it'),
           ),
           ListTile(
             leading: Icon(Icons.info),
@@ -98,7 +99,7 @@ class _AboutPageState extends State<AboutPage> {
                 applicationIcon: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Image.asset(
-                    "assets/images/applogo.png",
+                    'assets/images/applogo.png',
                     height: 64.0,
                   ),
                 ),

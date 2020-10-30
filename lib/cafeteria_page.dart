@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:http/http.dart';
@@ -20,20 +19,20 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
   }
 
   Future<List<String>> _getCafeteriaPlanInit() async {
-    final List<String> _cafeteriaDetailList = [];
-    final Response content = await Client()
+    final _cafeteriaDetailList = <String>[];
+    final content = await Client()
         .get('https://engelsburg.smmp.de/leben-an-der-schule/cafeteria/');
-    final dom.Document document = parse(content.body);
-    final List<dom.Element> cafeteria =
-        document.querySelectorAll("div.entry-content > p");
+    final document = parse(content.body);
+    final cafeteria = document.querySelectorAll('div.entry-content > p');
     for (var cafeteriaDetail in cafeteria) {
-      if (cafeteriaDetail.text.trim().isNotEmpty)
+      if (cafeteriaDetail.text.trim().isNotEmpty) {
         _cafeteriaDetailList.add(
           HtmlUnescape()
-              .convert(cafeteriaDetail.outerHtml.replaceAll("<br>", "\n"))
+              .convert(cafeteriaDetail.outerHtml.replaceAll('<br>', '\n'))
               .replaceAll(RegExp(r'<[^>]*>'), '')
               .trim(),
         );
+      }
     }
     return _cafeteriaDetailList;
   }
@@ -43,7 +42,7 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
     return FutureBuilder(
       future: _getCafeteriaPlan,
       builder: (context, snapshot) {
-        if (snapshot.hasData)
+        if (snapshot.hasData) {
           return RefreshIndicator(
             onRefresh: () => _getCafeteriaPlan = _getCafeteriaPlanInit(),
             child: ListView(
@@ -75,6 +74,7 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
               ],
             ),
           );
+        }
         return Center(child: CircularProgressIndicator());
       },
     );

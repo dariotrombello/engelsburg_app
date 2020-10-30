@@ -28,7 +28,7 @@ class _SchoolNewspaperPageState extends State<SchoolNewspaperPage> {
       return true;
     }
     final deviceInfo = DeviceInfoPlugin();
-    bool hasSupport = false;
+    var hasSupport = false;
     if (Platform.isAndroid == true) {
       final androidInfo = await deviceInfo.androidInfo;
       hasSupport = androidInfo.version.sdkInt >= 21;
@@ -41,7 +41,7 @@ class _SchoolNewspaperPageState extends State<SchoolNewspaperPage> {
     return FutureBuilder(
       future: _hasSupport,
       builder: (context, snapshot) {
-        if (snapshot.data == false)
+        if (snapshot.data == false) {
           return Padding(
             padding: EdgeInsets.all(16.0),
             child: Column(
@@ -54,7 +54,7 @@ class _SchoolNewspaperPageState extends State<SchoolNewspaperPage> {
                 Padding(
                   padding: EdgeInsets.only(top: 16.0),
                   child: Text(
-                    "Schülerzeitung wird erst ab Android 5.0 unterstützt",
+                    'Schülerzeitung wird erst ab Android 5.0 unterstützt',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 22.0),
                   ),
@@ -62,6 +62,7 @@ class _SchoolNewspaperPageState extends State<SchoolNewspaperPage> {
               ],
             ),
           );
+        }
         if (snapshot.data == true) {
           return PdfView(controller: _pdfController);
         }
