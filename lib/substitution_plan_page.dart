@@ -68,13 +68,14 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
   }
 
   Future _getSubstitutionPlan() async {
+    final weekday = DateTime.now().weekday;
     _substitutionDays.clear();
     _newsDays.clear();
     var untisWeeks = <String>[];
     final navbar = await Client().get(Uri.encodeFull(
         'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/frames/navbar.htm'));
     final navbarDocument = parse(navbar.body);
-    final navbarWeeks = DateTime.now().weekday >= 5
+    final navbarWeeks = weekday >= 5 || weekday == 1
         ? navbarDocument.querySelectorAll('select[name=week] > option')
         : [navbarDocument.querySelector('select[name=week] > option')];
     final info = navbarDocument.querySelector('span.description').text;
