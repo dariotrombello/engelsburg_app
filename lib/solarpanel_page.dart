@@ -1,7 +1,8 @@
+import 'package:engelsburg_app/error_card.dart';
 import 'package:flutter/material.dart';
 
 import 'package:html/parser.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 class SolarPanelPage extends StatefulWidget {
   @override
@@ -9,23 +10,29 @@ class SolarPanelPage extends StatefulWidget {
 }
 
 class _SolarPanelPageState extends State<SolarPanelPage> {
-  String _solarAvoidedCarbonDioxide = '';
-  String _solarDate = '';
-  String _solarEnergy = '';
-  String _solarRevenue = '';
+  var _solarAvoidedCarbonDioxide = '';
+  var _solarDate = '';
+  var _solarEnergy = '';
+  var _solarRevenue = '';
 
   Future<List<String>> _getSolarPanelData() async {
-    final _solarDescription = <String>[];
-    final solarDataLink = await Client().get(Uri.encodeFull(
-        'https://www.sunnyportal.com/Templates/PublicPageOverview.aspx?plant=554d90c7-84a2-474c-94db-d2ac5f5af3c3&splang=de-DE'));
-    final solarDescriptionLink = await Client().get(Uri.encodeFull(
-        'https://engelsburg.smmp.de/leben-an-der-schule/solaranlage/'));
-    final document1 = parse(solarDataLink.body);
-    final document2 = parse(solarDescriptionLink.body);
+    final solarDescription = <String>[];
+
+    final solarDataUrl = Uri.parse(
+        'https://www.sunnyportal.com/Templates/PublicPageOverview.aspx?plant=554d90c7-84a2-474c-94db-d2ac5f5af3c3&splang=de-DE');
+    final solarDataRes = await http.get(solarDataUrl);
+    if (!solarDataRes.statusCode.toString().startsWith('2')) {
+      throw 'Error while trying to load the page';
+    }
+    final solarDescriptionUrl = Uri.parse(
+        'https://engelsburg.smmp.de/leben-an-der-schule/solaranlage/');
+    final solarDescriptionRes = await http.get(solarDescriptionUrl);
+    final document1 = parse(solarDataRes.body);
+    final document2 = parse(solarDescriptionRes.body);
     final solarDescriptionList =
         document2.querySelectorAll('div.entry-content > p');
     for (var _solarText in solarDescriptionList) {
-      _solarDescription.add(
+      solarDescription.add(
         _solarText.text,
       );
     }
@@ -45,7 +52,7 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
         .querySelector(
             'div.base-label-titel > #ctl00_ContentPlaceHolder1_PublicPagePlaceholder_PageUserControl_ctl00_UserControl0_LabelRevenueValue')
         .text;
-    return _solarDescription;
+    return solarDescription;
   }
 
   @override
@@ -60,7 +67,7 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return RefreshIndicator(
-              onRefresh: () => _getSolarPanelData(),
+              onRefresh: () async => setState(() {}),
               child: ListView(
                 padding: const EdgeInsets.all(16.0),
                 children: <Widget>[
@@ -130,6 +137,8 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
                 ],
               ),
             );
+          } else if (snapshot.hasError) {
+            return ErrorCard();
           }
           return Center(child: CircularProgressIndicator());
         },

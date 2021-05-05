@@ -1,10 +1,11 @@
+import 'package:engelsburg_app/error_card.dart';
+import 'package:engelsburg_app/main.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
-import 'package:http/http.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class SubstitutionPlanPage extends StatefulWidget {
@@ -30,7 +31,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
   final TextEditingController _teacherNameController = TextEditingController();
   Future _substitutionPlan;
   int _welcomePage = 0;
-  SharedPreferences _prefs;
+  final _prefs = SharedPrefs.instance;
   bool _teacherSelected;
 
   @override
@@ -41,21 +42,18 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
   }
 
   Future _checkLogin() async {
-    _prefs = await SharedPreferences.getInstance();
     setState(() => _isLoggedIn = (_prefs.getBool('isLoggedIn') ?? false) &&
         _prefs.getString('substitutionFilter') != null);
     await _prefs.setBool('isLoggedIn', _isLoggedIn);
   }
 
   Future _logIn() async {
-    _prefs = await SharedPreferences.getInstance();
+    setState(
+        () => _isLoggedIn = _prefs.getString('substitutionFilter') != null);
     await _prefs.setBool('isLoggedIn', true);
-    setState(() => _isLoggedIn = (_prefs.getBool('isLoggedIn') &&
-        _prefs.getString('substitutionFilter') != null));
   }
 
   Future _getSubstitutionFilter() async {
-    _prefs = await SharedPreferences.getInstance();
     _teacherSelected = _prefs.getBool('teacherSelected');
     _substitutionFilter =
         _prefs.getString('substitutionFilter') ?? 'Alle Klassen anzeigen';
@@ -63,7 +61,6 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
   }
 
   Future _setSubstitutionFilter() async {
-    _prefs = await SharedPreferences.getInstance();
     await _prefs.setString('substitutionFilter', _substitutionFilter);
   }
 
@@ -72,9 +69,10 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
     _substitutionDays.clear();
     _newsDays.clear();
     var untisWeeks = <String>[];
-    final navbar = await Client().get(Uri.encodeFull(
-        'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/frames/navbar.htm'));
-    final navbarDocument = parse(navbar.body);
+    final navbarUrl = Uri.parse(
+        'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/frames/navbar.htm');
+    final navbarRes = await http.get(navbarUrl);
+    final navbarDocument = parse(navbarRes.body);
     final navbarWeeks = weekday >= 5 || weekday == 1
         ? navbarDocument.querySelectorAll('select[name=week] > option')
         : [navbarDocument.querySelector('select[name=week] > option')];
@@ -83,10 +81,11 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
 
     for (var i = 0; i < navbarWeeks.length; i++) {
       untisWeeks.add(navbarWeeks[i].attributes['value']);
-      final substitutionTable = await Client().get(Uri.encodeFull(
+      final substitutionTableUrl = Uri.parse(
           'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/' +
               untisWeeks[i] +
-              '/w/w00000.htm'));
+              '/w/w00000.htm');
+      final substitutionTable = await http.get(substitutionTableUrl);
       final substitutionTableDocument = parse(substitutionTable.body);
       final _allSubstitutionDays =
           substitutionTableDocument.querySelectorAll('table.subst > tbody');
@@ -111,9 +110,9 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
     }
 
     // Klassenliste aus dem Javascript-Element der Seite in eine List<String> konvertieren
-    _allClasses = navbar.body
-        .substring(
-            navbar.body.indexOf('var classes = ['), navbar.body.indexOf('];'))
+    _allClasses = navbarRes.body
+        .substring(navbarRes.body.indexOf('var classes = ['),
+            navbarRes.body.indexOf('];'))
         .trim()
         .replaceFirst('var classes = [', '')
         .replaceFirst('];', '')
@@ -161,8 +160,8 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
               _welcomePage == 0) {
             return Scaffold(
               floatingActionButton: FloatingActionButton(
-                child: Icon(Icons.arrow_forward),
                 onPressed: () => setState(() => _welcomePage = 1),
+                child: Icon(Icons.arrow_forward),
               ),
               body: Padding(
                 padding: EdgeInsets.all(16.0),
@@ -190,12 +189,12 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                             'Um sich anzumelden, wird das Passwort benötigt, das auch für den Vertretungsplan auf der Internetseite der Engelsburg verwendet wird. Falls Sie es nicht finden können, sprechen Sie mich in der Schule an oder schreiben Sie mir eine E-Mail mit Nachweis als Schüler/Lehrer an ',
                         children: <TextSpan>[
                           TextSpan(
-                              text: 'info@dariotrombello.it',
+                              text: 'info@dariotrombello.com',
                               style: TextStyle(color: Colors.blue),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   url_launcher
-                                      .launch('mailto:info@dariotrombello.it');
+                                      .launch('mailto:info@dariotrombello.com');
                                 }),
                           TextSpan(text: '.')
                         ],
@@ -359,14 +358,14 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                       SizedBox(
                         height: 60,
                         width: width,
-                        child: RaisedButton(
-                          child: Text('EINLOGGEN'),
+                        child: ElevatedButton(
                           onPressed: () => _input == _password
                               ? _logIn()
                               : setState(() {
                                   _wrongPassword = true;
                                   _passwordController.clear();
                                 }),
+                          child: Text('EINLOGGEN'),
                         ),
                       ),
                     ],
@@ -381,7 +380,8 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
               controller: _tabController,
               children: <Widget>[
                 RefreshIndicator(
-                  onRefresh: () => _substitutionPlan = _substitutionPlanInit(),
+                  onRefresh: () async => setState(
+                      () => _substitutionPlan = _substitutionPlanInit()),
                   child: ListView.builder(
                     itemCount: _substitutionDays.length,
                     itemBuilder: (context, index) {
@@ -480,7 +480,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                         'Alle Klassen anzeigen') {
                                       _hideElement = false;
                                     } else if (
-                                        // Gibt es einen besseren Weg, von Untis zusammengesetzte
+                                        // Gibt es einen besseren Weg, um von Untis zusammengesetzte
                                         // Klassen wie 7abcd8abc wieder zu trennen?
                                         _classes[index2]
                                                 .startsWith(RegExp(r'^\d+')) &&
@@ -540,117 +540,132 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
 
                                     return Column(
                                       children: <Widget>[
-                                        _hideElement
-                                            ? Container()
-                                            : Card(
-                                                color: _substitutionTypeColor(),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(6.0),
-                                                  child: Column(
-                                                    children: [
-                                                      ListTile(
-                                                          leading: Text(
-                                                            _hours[index2]
-                                                                .toString(),
-                                                            style: TextStyle(
-                                                                fontSize: 28.0,
-                                                                color: Colors
-                                                                    .white),
+                                        if (!_hideElement)
+                                          Card(
+                                            color: _substitutionTypeColor(),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(6.0),
+                                              child: Column(
+                                                children: [
+                                                  ListTile(
+                                                      leading: Text(
+                                                        _hours[index2]
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            fontSize: 28.0,
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                      title: Text(
+                                                        _substitutionTypes[
+                                                                index2]
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                      subtitle: Wrap(
+                                                        children: <Widget>[
+                                                          RichText(
+                                                            text: TextSpan(
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .white70),
+                                                              text: _classes[
+                                                                      index2]
+                                                                  .toString(),
+                                                              children: <
+                                                                  TextSpan>[
+                                                                TextSpan(
+                                                                    text: _subjects[index2].toString().isEmpty ||
+                                                                            _classes[index2].toString().isEmpty
+                                                                        ? ''
+                                                                        : ' – '),
+                                                                TextSpan(
+                                                                    text: _subjects[
+                                                                            index2]
+                                                                        .toString()),
+                                                                TextSpan(
+                                                                    text: _substitutionTeachers[index2]
+                                                                            .toString()
+                                                                            .isEmpty
+                                                                        ? ''
+                                                                        : ' (${_substitutionTeachers[index2]}'),
+                                                                TextSpan(
+                                                                    text: _substitutionTeachers[index2].toString().isNotEmpty &&
+                                                                            _teachers[index2].toString().isEmpty
+                                                                        ? ')'
+                                                                        : ''),
+                                                                TextSpan(
+                                                                    text: _substitutionTeachers[index2].toString().isNotEmpty &&
+                                                                            _teachers[index2]
+                                                                                .toString()
+                                                                                .isNotEmpty &&
+                                                                            _substitutionTeachers[index2].toString() !=
+                                                                                _teachers[index2].toString()
+                                                                        ? ' statt '
+                                                                        : ''),
+                                                                TextSpan(
+                                                                    text: _substitutionTeachers[index2].toString().isEmpty &&
+                                                                            _teachers[index2].toString().isNotEmpty
+                                                                        ? ' ('
+                                                                        : ''),
+                                                                TextSpan(
+                                                                    text: _teachers[index2].toString() ==
+                                                                            _substitutionTeachers[index2]
+                                                                                .toString()
+                                                                        ? ''
+                                                                        : _teachers[
+                                                                            index2],
+                                                                    style:
+                                                                        TextStyle(
+                                                                      decoration:
+                                                                          TextDecoration
+                                                                              .lineThrough,
+                                                                    )),
+                                                                TextSpan(
+                                                                    text: _teachers[index2]
+                                                                            .toString()
+                                                                            .isNotEmpty
+                                                                        ? ')'
+                                                                        : ''),
+                                                                TextSpan(
+                                                                    text: _rooms[index2]
+                                                                            .toString()
+                                                                            .isEmpty
+                                                                        ? ''
+                                                                        : ' in ' +
+                                                                            _rooms[index2]),
+                                                                TextSpan(
+                                                                    text: _substitutionInformation[index2]
+                                                                            .toString()
+                                                                            .isEmpty
+                                                                        ? ''
+                                                                        : ' – ${_substitutionInformation[index2].toString()}'),
+                                                                TextSpan(
+                                                                    text: _substitutionSpan[index2]
+                                                                            .toString()
+                                                                            .isEmpty
+                                                                        ? ''
+                                                                        : ' – ${_substitutionSpan[index2].toString()}')
+                                                              ],
+                                                            ),
                                                           ),
-                                                          title: Text(
-                                                            _substitutionTypes[
-                                                                    index2]
-                                                                .toString(),
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white),
-                                                          ),
-                                                          subtitle: Wrap(
-                                                            children: <Widget>[
-                                                              RichText(
-                                                                text: TextSpan(
-                                                                  style: TextStyle(
-                                                                      color: Colors
-                                                                          .white70),
-                                                                  text: _classes[
-                                                                          index2]
-                                                                      .toString(),
-                                                                  children: <
-                                                                      TextSpan>[
-                                                                    TextSpan(
-                                                                        text: _subjects[index2].toString().isEmpty ||
-                                                                                _classes[index2].toString().isEmpty
-                                                                            ? ''
-                                                                            : ' – '),
-                                                                    TextSpan(
-                                                                        text: _subjects[index2]
-                                                                            .toString()),
-                                                                    TextSpan(
-                                                                        text: _substitutionTeachers[index2].toString().isEmpty
-                                                                            ? ''
-                                                                            : ' (${_substitutionTeachers[index2]}'),
-                                                                    TextSpan(
-                                                                        text: _substitutionTeachers[index2].toString().isNotEmpty &&
-                                                                                _teachers[index2].toString().isEmpty
-                                                                            ? ')'
-                                                                            : ''),
-                                                                    TextSpan(
-                                                                        text: _substitutionTeachers[index2].toString().isNotEmpty &&
-                                                                                _teachers[index2].toString().isNotEmpty &&
-                                                                                _substitutionTeachers[index2].toString() != _teachers[index2].toString()
-                                                                            ? ' statt '
-                                                                            : ''),
-                                                                    TextSpan(
-                                                                        text: _substitutionTeachers[index2].toString().isEmpty &&
-                                                                                _teachers[index2].toString().isNotEmpty
-                                                                            ? ' ('
-                                                                            : ''),
-                                                                    TextSpan(
-                                                                        text: _teachers[index2].toString() == _substitutionTeachers[index2].toString()
-                                                                            ? ''
-                                                                            : _teachers[
-                                                                                index2],
-                                                                        style:
-                                                                            TextStyle(
-                                                                          decoration:
-                                                                              TextDecoration.lineThrough,
-                                                                        )),
-                                                                    TextSpan(
-                                                                        text: _teachers[index2].toString().isNotEmpty
-                                                                            ? ')'
-                                                                            : ''),
-                                                                    TextSpan(
-                                                                        text: _rooms[index2].toString().isEmpty
-                                                                            ? ''
-                                                                            : ' in ' +
-                                                                                _rooms[index2]),
-                                                                    TextSpan(
-                                                                        text: _substitutionInformation[index2].toString().isEmpty
-                                                                            ? ''
-                                                                            : ' – ${_substitutionInformation[index2].toString()}'),
-                                                                    TextSpan(
-                                                                        text: _substitutionSpan[index2].toString().isEmpty
-                                                                            ? ''
-                                                                            : ' – ${_substitutionSpan[index2].toString()}')
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          )),
-                                                    ],
-                                                  ),
-                                                ),
+                                                        ],
+                                                      )),
+                                                ],
                                               ),
-                                        _substitutionDays.last ==
-                                                    _substitutionDays[index] &&
-                                                index2 + 1 == _classes.length
-                                            ? Padding(
-                                                padding:
-                                                    const EdgeInsets.all(6.0),
-                                                child: Text(
-                                                    _lastChanged.toString()))
-                                            : Container()
+                                            ),
+                                          ),
+                                        if (_substitutionDays.last ==
+                                                _substitutionDays[index] &&
+                                            index2 + 1 == _classes.length)
+                                          Padding(
+                                              padding:
+                                                  const EdgeInsets.all(6.0),
+                                              child:
+                                                  Text(_lastChanged.toString()))
                                       ],
                                     );
                                   },
@@ -661,7 +676,8 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                   ),
                 ),
                 RefreshIndicator(
-                  onRefresh: () => _substitutionPlan = _substitutionPlanInit(),
+                  onRefresh: () async => setState(
+                      () => _substitutionPlan = _substitutionPlanInit()),
                   child: ListView.builder(
                     itemCount: _substitutionDays.length,
                     itemBuilder: (context, index) {
@@ -678,48 +694,77 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                               ),
                             ),
                           ),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount:
-                                _newsDays[index].querySelectorAll('tr').length -
-                                    1,
-                            itemBuilder: (context, index2) {
-                              var _news = <String>[];
-                              for (var _newsDay in _newsDays[index]
-                                  .querySelectorAll('tr')
-                                  .sublist(1)) {
-                                _news.add(_newsDay.text);
-                              }
-                              return Column(
+                          ..._newsDays[index]
+                              .querySelectorAll('tr')
+                              .sublist(1)
+                              .map((newsDay) {
+                            return Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: <Widget>[
+                                children: [
                                   Card(
                                     child: Padding(
                                       padding: const EdgeInsets.all(16.0),
                                       child: Text(
-                                        _news[index2].toString(),
+                                        newsDay.text.toString(),
                                         style: TextStyle(fontSize: 16.0),
                                       ),
                                     ),
                                   ),
-                                  _newsDays.last == _newsDays[index] &&
-                                          index2 + 1 ==
-                                              _newsDays[index]
-                                                      .querySelectorAll('tr')
-                                                      .length -
-                                                  1
-                                      ? Center(
-                                          child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(6.0),
-                                              child: Text(
-                                                  _lastChanged.toString())))
-                                      : Container()
-                                ],
-                              );
-                            },
-                          ),
+                                  if (_newsDays.last == _newsDays[index] &&
+                                      _newsDays[index]
+                                              .querySelectorAll('tr')
+                                              .sublist(1)
+                                              .last ==
+                                          newsDay)
+                                    Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(6.0),
+                                        child: Text(_lastChanged.toString()),
+                                      ),
+                                    )
+                                ]);
+                          }).toList(),
+
+                          // ListView.builder(
+                          //   shrinkWrap: true,
+                          //   physics: NeverScrollableScrollPhysics(),
+                          //   itemCount:
+                          //       _newsDays[index].querySelectorAll('tr').length -
+                          //           1,
+                          //   itemBuilder: (context, index2) {
+                          //     var _news = <String>[];
+                          //     for (var _newsDay in _newsDays[index]
+                          //         .querySelectorAll('tr')
+                          //         .sublist(1)) {
+                          //       _news.add(_newsDay.text);
+                          //     }
+                          //     return Column(
+                          //       crossAxisAlignment: CrossAxisAlignment.stretch,
+                          //       children: <Widget>[
+                          //         Card(
+                          //           child: Padding(
+                          //             padding: const EdgeInsets.all(16.0),
+                          //             child: Text(
+                          //               _news[index2].toString(),
+                          //               style: TextStyle(fontSize: 16.0),
+                          //             ),
+                          //           ),
+                          //         ),
+                          //         if (_newsDays.last == _newsDays[index] &&
+                          //             index2 + 1 ==
+                          //                 _newsDays[index]
+                          //                         .querySelectorAll('tr')
+                          //                         .length -
+                          //                     1)
+                          //           Center(
+                          //               child: Padding(
+                          //                   padding: const EdgeInsets.all(6.0),
+                          //                   child:
+                          //                       Text(_lastChanged.toString())))
+                          //       ],
+                          //     );
+                          //   },
+                          // ),
                         ],
                       );
                     },
@@ -727,6 +772,8 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                 ),
               ],
             );
+          } else if (snapshot.hasError) {
+            return ErrorCard();
           }
           return Center(child: CircularProgressIndicator());
         },

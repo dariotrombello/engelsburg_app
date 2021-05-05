@@ -6,8 +6,20 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
-class AboutSchoolPage extends StatelessWidget {
+class AboutSchoolPage extends StatefulWidget {
+  @override
+  _AboutSchoolPageState createState() => _AboutSchoolPageState();
+}
+
+class _AboutSchoolPageState extends State<AboutSchoolPage> {
   final LatLng _engelsburgPosition = LatLng(51.315228, 9.488160);
+  GoogleMapController _mapController;
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +71,9 @@ class AboutSchoolPage extends StatelessWidget {
             child: SizedBox(
               height: 250,
               child: GoogleMap(
+                onMapCreated: (controller) {
+                  _mapController = controller;
+                },
                 myLocationButtonEnabled: false,
                 liteModeEnabled: Platform.isAndroid,
                 initialCameraPosition:

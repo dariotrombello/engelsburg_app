@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
 
 import 'package:html/parser.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
-class EventsPage extends StatelessWidget {
-  Future _getTermine() async {
-    final termineStringList = <String>[];
-    final termine =
-        await Client().get('https://engelsburg.smmp.de/organisation/termine/');
-    final document = parse(termine.body);
-    final termineList =
-        document.querySelectorAll('div.entry-content > ul.navlist > li');
-    for (var termin in termineList) {
-      termineStringList.add(termin.text);
+import 'error_card.dart';
+
+class EventsPage extends StatefulWidget {
+  @override
+  _EventsPageState createState() => _EventsPageState();
+}
+
+class _EventsPageState extends State<EventsPage> {
+  Future<List<String>> _getEvents() async {
+    final eventStringList = <String>[];
+    final url = Uri.parse('https://engelsburg.smmp.de/organisation/termine/');
+    final res = await http.get(url);
+    if (!res.statusCode.toString().startsWith('2')) {
+      throw 'Error while trying to load the page';
     }
-    return termineStringList;
+    final document = parse(res.body);
+    final eventList =
+        document.querySelectorAll('div.entry-content > ul.navlist > li');
+    for (var event in eventList) {
+      eventStringList.add(event.text);
+    }
+    return eventStringList;
   }
 
   @override
@@ -25,38 +35,20 @@ class EventsPage extends StatelessWidget {
         title: Text('Termine'),
       ),
       body: FutureBuilder(
-        future: _getTermine(),
+        future: _getEvents(),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data.isNotEmpty) {
             return RefreshIndicator(
-              onRefresh: () => _getTermine(),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16.0),
+              onRefresh: () async => setState(() {}),
+              child: ListView.separated(
+                separatorBuilder: (context, index) => Divider(height: 0),
                 itemCount: snapshot.data.length,
                 itemBuilder: (context, index) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text(
-                            snapshot.data[index].toString().substring(0, 10),
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 5.0),
-                        child: Text(
-                          snapshot.data[index].toString().substring(12),
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12.0),
-                      ),
-                    ],
+                  return ListTile(
+                    title:
+                        Text(snapshot.data[index].toString().substring(0, 10)),
+                    subtitle:
+                        Text(snapshot.data[index].toString().substring(12)),
                   );
                 },
               ),
@@ -85,6 +77,8 @@ class EventsPage extends StatelessWidget {
                 ),
               ),
             );
+          } else if (snapshot.hasError) {
+            return ErrorCard();
           }
           return Center(child: CircularProgressIndicator());
         },

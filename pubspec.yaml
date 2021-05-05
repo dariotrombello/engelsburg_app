@@ -1,6 +1,7 @@
 name: engelsburg_app
 description: Eine App von Dario Trombello, die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.
-version: 1.4.1+11
+publish_to: 'none'
+version: 1.5.2+15
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -8,26 +9,26 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  device_info: ^0.4.2+9
-  flutter_html: ^1.0.2
-  google_maps_flutter: ^1.0.5
-  html: ^0.14.0+4
-  html_unescape: ^1.0.1
-  http: ^0.12.2
-  intl: ^0.16.1
-  json_annotation: ^3.1.0
-  native_pdf_view: ^3.8.0
-  package_info: '>=0.4.3 <2.0.0'
-  shared_preferences: '>=0.5.12+2 <2.0.0'
-  url_launcher: ^5.7.8
-  weather_icons: ^2.0.2
+  flutter_localizations:
+    sdk: flutter
+  cached_network_image: ^3.0.0
+  device_info: ^2.0.0
+  flutter_widget_from_html_core: ^0.6.1
+  google_maps_flutter: ^2.0.3
+  html: ^0.15.0
+  html_unescape: ^2.0.0
+  http: ^0.13.3
+  intl: ^0.17.0
+  native_pdf_view: ^4.0.1
+  package_info: ^2.0.0
+  shared_preferences: ^2.0.5
+  url_launcher: ^6.0.3
+  weather_icons: ^3.0.0-nullsafety.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^1.10.4
-  json_serializable: ^3.4.1
-  pedantic: ^1.9.2
+  pedantic: ^1.11.0
 
 flutter:
   uses-material-design: true

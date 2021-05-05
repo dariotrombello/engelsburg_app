@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:package_info/package_info.dart';
@@ -13,10 +15,10 @@ class AboutPage extends StatefulWidget {
 class _AboutPageState extends State<AboutPage> {
   // Notiz, dass die App nicht von der Schule ist, MUSS erhalten bleiben.
   final String appDescription =
-      'Eine App von Dario Trombello (Kurs E1EngT1-CAW), die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.';
+      'Eine App von Dario Trombello (Englisch-LK CAW), die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.';
 
   // Die Strings werden geändert, wenn PackageInfo die Daten der App geladen hat.
-  PackageInfo _packageInfo = PackageInfo(
+  var _packageInfo = PackageInfo(
     appName: 'Engelsburg-App',
     packageName: 'Unknown',
     version: 'Unknown',
@@ -65,8 +67,9 @@ class _AboutPageState extends State<AboutPage> {
             title: Text(
               'App bewerten',
             ),
-            onTap: () => url_launcher.launch(
-                'https://play.google.com/store/apps/details?id=de.dariotrombello.engelsburg_app'),
+            onTap: () => url_launcher.launch(Platform.isIOS
+                ? 'https://apps.apple.com/app/engelsburg-app/id1529725542'
+                : 'https://play.google.com/store/apps/details?id=de.dariotrombello.engelsburg_app'),
           ),
           ListTile(
             leading: Icon(Icons.code),
@@ -81,14 +84,14 @@ class _AboutPageState extends State<AboutPage> {
             title: Text(
               'Besuche meine Webseite',
             ),
-            onTap: () => url_launcher.launch('https://dariotrombello.it'),
+            onTap: () => url_launcher.launch('https://www.dariotrombello.com'),
           ),
           ListTile(
             leading: Icon(Icons.mail),
             title: Text(
               'Schreibe mir eine E-Mail',
             ),
-            onTap: () => url_launcher.launch('mailto:info@dariotrombello.it'),
+            onTap: () => url_launcher.launch('mailto:info@dariotrombello.com'),
           ),
           ListTile(
             leading: Icon(Icons.info),

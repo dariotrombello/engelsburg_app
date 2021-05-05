@@ -1,5 +1,7 @@
 import 'package:engelsburg_app/about_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cafeteria_page.dart';
 import 'news_page.dart';
@@ -10,8 +12,23 @@ import 'events_page.dart';
 import 'substitution_plan_page.dart';
 import 'weather_page.dart';
 
-void main() {
+class SharedPrefs {
+  static SharedPreferences instance;
+  static Future init() async {
+    instance = await SharedPreferences.getInstance();
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPrefs.init();
   runApp(MaterialApp(
+    localizationsDelegates: [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: [Locale('de')],
     home: EngelsburgApp(),
     theme: ThemeData.light().copyWith(
       visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -34,13 +51,13 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
+        index: _currentIndex,
         children: [
           NewsPage(),
           CafeteriaPage(),
           SchoolNewspaperPage(),
           SubstitutionPlanPage()
         ],
-        index: _currentIndex,
       ),
       drawer: Drawer(
         child: ListView(
@@ -100,6 +117,7 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
       appBar: AppBar(
         actions: [
           IconButton(
+              tooltip: 'Über',
               icon: Icon(Icons.info_outline),
               onPressed: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => AboutPage())))
