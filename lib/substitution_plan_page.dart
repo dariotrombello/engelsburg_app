@@ -15,24 +15,24 @@ class SubstitutionPlanPage extends StatefulWidget {
 
 class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
     with SingleTickerProviderStateMixin {
-  bool _isLoggedIn = false;
-  bool _noSubstitutionsAvailable = false;
-  bool _wrongPassword = false;
-  final List<dom.Element> _newsDays = [];
-  final List<dom.Element> _substitutionDays = [];
-  final List<String> _dayList = [];
-  List<String> _allClasses = [];
-  String _input;
-  String _lastChanged = '';
+  var _isLoggedIn = false;
+  var _noSubstitutionsAvailable = false;
+  var _passwordObscured = true;
+  final _newsDays = <dom.Element>[];
+  final _substitutionDays = <dom.Element>[];
+  final _dayList = <String>[];
+  var _allClasses = <String>[];
+  var _lastChanged = '';
   String _substitutionFilter;
-  final String _password = '@Vertretung2019';
+  final _password = '@Vertretung2019';
   TabController _tabController;
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _teacherNameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _teacherNameController = TextEditingController();
   Future _substitutionPlan;
-  int _welcomePage = 0;
   final _prefs = SharedPrefs.instance;
   bool _teacherSelected;
+  final _pageController = PageController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -41,23 +41,36 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
     _tabController = TabController(length: 2, vsync: this);
   }
 
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    _passwordController?.dispose();
+    _teacherNameController?.dispose();
+    _pageController?.dispose();
+    super.dispose();
+  }
+
   Future _checkLogin() async {
-    setState(() => _isLoggedIn = (_prefs.getBool('isLoggedIn') ?? false) &&
-        _prefs.getString('substitutionFilter') != null);
-    await _prefs.setBool('isLoggedIn', _isLoggedIn);
+    final isLoggedIn = _prefs.getBool('isLoggedIn');
+
+    _isLoggedIn = isLoggedIn ?? false;
+    if (isLoggedIn == null) {
+      await _prefs.setBool('isLoggedIn', _isLoggedIn);
+    }
   }
 
   Future _logIn() async {
-    setState(
-        () => _isLoggedIn = _prefs.getString('substitutionFilter') != null);
-    await _prefs.setBool('isLoggedIn', true);
+    setState(() => _isLoggedIn = true);
+    await _prefs.setBool('isLoggedIn', _isLoggedIn);
   }
 
   Future _getSubstitutionFilter() async {
-    _teacherSelected = _prefs.getBool('teacherSelected');
-    _substitutionFilter =
-        _prefs.getString('substitutionFilter') ?? 'Alle Klassen anzeigen';
-    await _prefs.setString('substitutionFilter', _substitutionFilter);
+    _teacherSelected = _prefs.getBool('teacherSelected') ?? false;
+    _substitutionFilter = _prefs.getString('substitutionFilter');
+
+    if (_substitutionFilter == null) {
+      await _prefs.setString('substitutionFilter', 'Alle Klassen anzeigen');
+    }
   }
 
   Future _setSubstitutionFilter() async {
@@ -85,8 +98,8 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
           'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/' +
               untisWeeks[i] +
               '/w/w00000.htm');
-      final substitutionTable = await http.get(substitutionTableUrl);
-      final substitutionTableDocument = parse(substitutionTable.body);
+      final substitutionTableRes = await http.get(substitutionTableUrl);
+      final substitutionTableDocument = parse(substitutionTableRes.body);
       final _allSubstitutionDays =
           substitutionTableDocument.querySelectorAll('table.subst > tbody');
       final _allTables = substitutionTableDocument.querySelectorAll('table');
@@ -128,44 +141,31 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
     await _getSubstitutionPlan();
   }
 
+  void _goToNextPage() {
+    _pageController.nextPage(
+        duration: Duration(milliseconds: 350), curve: Curves.easeOutSine);
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      appBar: _isLoggedIn
-          ? TabBar(
-              // TEMP: Umgehung eines Bugs, der im hellen Modus der App auftritt
-              labelColor: Theme.of(context).textTheme.bodyText1.color,
-              controller: _tabController,
-              tabs: <Widget>[
-                Tab(
-                  child: Text(
-                    'Vertretungsplan',
-                  ),
+    return FutureBuilder(
+      future: _substitutionPlan,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done && !_isLoggedIn) {
+          return PageView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _pageController,
+            children: [
+              // welcome page
+              Scaffold(
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () => _goToNextPage(),
+                  child: Icon(Icons.arrow_forward),
                 ),
-                Tab(
-                  child: Text(
-                    'Nachrichten',
-                  ),
-                ),
-              ],
-            )
-          : null,
-      body: FutureBuilder(
-        future: _substitutionPlan,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done &&
-              !_isLoggedIn &&
-              _welcomePage == 0) {
-            return Scaffold(
-              floatingActionButton: FloatingActionButton(
-                onPressed: () => setState(() => _welcomePage = 1),
-                child: Icon(Icons.arrow_forward),
-              ),
-              body: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
+                body: ListView(
+                  padding: EdgeInsets.all(16.0),
                   children: <Widget>[
                     Padding(
                       padding: EdgeInsets.all(16.0),
@@ -184,7 +184,8 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                     RichText(
                       text: TextSpan(
                         style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyText1.color),
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                            height: 1.5),
                         text:
                             'Um sich anzumelden, wird das Passwort benötigt, das auch für den Vertretungsplan auf der Internetseite der Engelsburg verwendet wird. Falls Sie es nicht finden können, sprechen Sie mich in der Schule an oder schreiben Sie mir eine E-Mail mit Nachweis als Schüler/Lehrer an ',
                         children: <TextSpan>[
@@ -203,185 +204,217 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                   ],
                 ),
               ),
-            );
-          }
-
-          if (snapshot.connectionState == ConnectionState.done &&
-              !_isLoggedIn &&
-              _welcomePage == 1) {
-            return Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                children: <Widget>[
-                  Expanded(
-                    child: Card(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(4.0),
-                        onTap: () {
-                          setState(() {
-                            _teacherSelected = true;
-                            _prefs.setBool('teacherSelected', _teacherSelected);
-                            _welcomePage = 2;
-                          });
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.person,
-                              size: 64.0,
-                            ),
-                            Text(
-                              'Lehrer',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 32.0),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Card(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(4.0),
-                        onTap: () {
-                          setState(() {
-                            _teacherSelected = false;
-                            _prefs.setBool('teacherSelected', _teacherSelected);
-                            _welcomePage = 2;
-                          });
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.school,
-                              size: 64.0,
-                            ),
-                            Text(
-                              'Schüler',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 32.0),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          if (snapshot.connectionState == ConnectionState.done &&
-              !_isLoggedIn &&
-              _welcomePage == 2) {
-            return Center(
-              child: Card(
-                margin: EdgeInsets.all(16.0),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller: _passwordController,
-                        textAlign: TextAlign.center,
-                        obscureText: true,
-                        onChanged: (input) => setState(() => _input = input),
-                        onSubmitted: (input) => input == _password
-                            ? _logIn()
-                            : setState(() {
-                                _wrongPassword = true;
-                                _passwordController.clear();
-                              }),
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.lock),
-                            hintText: 'Passwort eingeben',
-                            errorText: _wrongPassword
-                                ? 'Falsches Passwort eingegeben'
-                                : null,
-                            border: const OutlineInputBorder()),
-                      ),
-                      Padding(padding: EdgeInsets.only(top: 16.0)),
-                      _teacherSelected
-                          ? SizedBox(
-                              width: 150,
-                              child: TextField(
-                                textAlign: TextAlign.center,
-                                decoration: const InputDecoration(
-                                    hintText: 'Lehrerkürzel',
-                                    border: OutlineInputBorder()),
-                                controller: _teacherNameController,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _substitutionFilter = value;
-                                    _setSubstitutionFilter();
-                                  });
-                                },
+              // select whether teacher or student
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: Card(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(4.0),
+                          onTap: () {
+                            setState(() {
+                              _teacherSelected = true;
+                              _prefs.setBool(
+                                  'teacherSelected', _teacherSelected);
+                              _goToNextPage();
+                            });
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                Icons.person,
+                                size: 32.0,
                               ),
-                            )
-                          : Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8.0),
-                              decoration: ShapeDecoration(
-                                  shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          width: 1.0, color: Colors.grey),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(4.0)))),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  hint: const Text('Nach Klasse filtern'),
-                                  value:
-                                      _allClasses.contains(_substitutionFilter)
+                              Text(
+                                'Lehrer',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 32.0),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Card(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(4.0),
+                          onTap: () {
+                            setState(() {
+                              _teacherSelected = false;
+                              _prefs.setBool(
+                                  'teacherSelected', _teacherSelected);
+                              _goToNextPage();
+                            });
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                Icons.school,
+                                size: 32.0,
+                              ),
+                              Text(
+                                'Schüler',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 32.0),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // enter credentials
+              Center(
+                child: Card(
+                  margin: EdgeInsets.all(16.0),
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextFormField(
+                            controller: _passwordController,
+                            textAlign: TextAlign.center,
+                            obscureText: _passwordObscured,
+                            validator: (input) {
+                              if (input.isEmpty) {
+                                return 'Passwort darf nicht leer sein';
+                              } else if (input != _password) {
+                                return 'Falsches Passwort eingegeben';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                                suffixIcon: IconButton(
+                                    icon: Icon(_passwordObscured
+                                        ? Icons.visibility_off
+                                        : Icons.visibility),
+                                    onPressed: () {
+                                      setState(() {
+                                        _passwordObscured = !_passwordObscured;
+                                      });
+                                    }),
+                                hintText: 'Passwort eingeben',
+                                border: const OutlineInputBorder()),
+                          ),
+                          Padding(padding: EdgeInsets.only(top: 16.0)),
+                          _teacherSelected
+                              ? SizedBox(
+                                  width: 150,
+                                  child: TextFormField(
+                                    textAlign: TextAlign.center,
+                                    decoration: const InputDecoration(
+                                        hintText: 'Lehrerkürzel',
+                                        border: OutlineInputBorder()),
+                                    controller: _teacherNameController,
+                                    validator: (value) {
+                                      if (_teacherSelected && value.isEmpty) {
+                                        return 'Bitte Lehrerkürzel eingeben';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                )
+                              : Container(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 8.0),
+                                  decoration: ShapeDecoration(
+                                      shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              width: 1.0, color: Colors.grey),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(4.0)))),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButtonFormField<String>(
+                                      hint: const Text('Nach Klasse filtern'),
+                                      value: _allClasses
+                                              .contains(_substitutionFilter)
                                           ? _substitutionFilter
                                           : _allClasses[0],
-                                  items: _allClasses
-                                      .map((String item) =>
-                                          DropdownMenuItem<String>(
-                                              value: item,
-                                              child: Text(item.toString())))
-                                      .toList(),
-                                  onChanged: (value) => setState(() {
-                                    _substitutionFilter = value;
-                                    _setSubstitutionFilter();
-                                  }),
+                                      items: _allClasses
+                                          .map((item) =>
+                                              DropdownMenuItem<String>(
+                                                  value: item,
+                                                  child: Text(item.toString())))
+                                          .toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _substitutionFilter = value;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (!_teacherSelected &&
+                                            value.isEmpty) {
+                                          return 'Klasse auswählen';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
                                 ),
-                              ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 32.0),
+                          ),
+                          SizedBox(
+                            height: 60,
+                            width: width,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState.validate()) {
+                                  _setSubstitutionFilter().then(
+                                      (_) => _logIn().then((_) => setState(() {
+                                            // reload this page
+                                            _substitutionPlan =
+                                                _substitutionPlanInit();
+                                          })));
+                                }
+                              },
+                              child: Text('Anmelden'),
                             ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 32.0),
+                          ),
+                        ],
                       ),
-                      SizedBox(
-                        height: 60,
-                        width: width,
-                        child: ElevatedButton(
-                          onPressed: () => _input == _password
-                              ? _logIn()
-                              : setState(() {
-                                  _wrongPassword = true;
-                                  _passwordController.clear();
-                                }),
-                          child: Text('EINLOGGEN'),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            );
-          }
+            ],
+          );
+        }
 
-          if (snapshot.connectionState == ConnectionState.done && _isLoggedIn) {
-            return TabBarView(
+        if (snapshot.connectionState == ConnectionState.done && _isLoggedIn) {
+          return Scaffold(
+            appBar: TabBar(
+              // TEMP: Umgehung eines Bugs, der im hellen Modus der App auftritt
+              labelColor: Theme.of(context).textTheme.bodyText1.color,
+              controller: _tabController,
+              tabs: <Widget>[
+                Tab(
+                  child: Text('Vertretungsplan'),
+                ),
+                Tab(
+                  child: Text('Nachrichten'),
+                ),
+              ],
+            ),
+            body: TabBarView(
               controller: _tabController,
               children: <Widget>[
                 RefreshIndicator(
-                  onRefresh: () async => setState(
-                      () => _substitutionPlan = _substitutionPlanInit()),
+                  onRefresh: () async => setState(() {
+                    _substitutionPlan = _substitutionPlanInit();
+                  }),
                   child: ListView.builder(
                     itemCount: _substitutionDays.length,
                     itemBuilder: (context, index) {
@@ -676,8 +709,9 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                   ),
                 ),
                 RefreshIndicator(
-                  onRefresh: () async => setState(
-                      () => _substitutionPlan = _substitutionPlanInit()),
+                  onRefresh: () async => setState(() {
+                    _substitutionPlan = _substitutionPlanInit();
+                  }),
                   child: ListView.builder(
                     itemCount: _substitutionDays.length,
                     itemBuilder: (context, index) {
@@ -724,60 +758,19 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                     )
                                 ]);
                           }).toList(),
-
-                          // ListView.builder(
-                          //   shrinkWrap: true,
-                          //   physics: NeverScrollableScrollPhysics(),
-                          //   itemCount:
-                          //       _newsDays[index].querySelectorAll('tr').length -
-                          //           1,
-                          //   itemBuilder: (context, index2) {
-                          //     var _news = <String>[];
-                          //     for (var _newsDay in _newsDays[index]
-                          //         .querySelectorAll('tr')
-                          //         .sublist(1)) {
-                          //       _news.add(_newsDay.text);
-                          //     }
-                          //     return Column(
-                          //       crossAxisAlignment: CrossAxisAlignment.stretch,
-                          //       children: <Widget>[
-                          //         Card(
-                          //           child: Padding(
-                          //             padding: const EdgeInsets.all(16.0),
-                          //             child: Text(
-                          //               _news[index2].toString(),
-                          //               style: TextStyle(fontSize: 16.0),
-                          //             ),
-                          //           ),
-                          //         ),
-                          //         if (_newsDays.last == _newsDays[index] &&
-                          //             index2 + 1 ==
-                          //                 _newsDays[index]
-                          //                         .querySelectorAll('tr')
-                          //                         .length -
-                          //                     1)
-                          //           Center(
-                          //               child: Padding(
-                          //                   padding: const EdgeInsets.all(6.0),
-                          //                   child:
-                          //                       Text(_lastChanged.toString())))
-                          //       ],
-                          //     );
-                          //   },
-                          // ),
                         ],
                       );
                     },
                   ),
                 ),
               ],
-            );
-          } else if (snapshot.hasError) {
-            return ErrorCard();
-          }
-          return Center(child: CircularProgressIndicator());
-        },
-      ),
+            ),
+          );
+        } else if (snapshot.hasError) {
+          return ErrorCard();
+        }
+        return Center(child: CircularProgressIndicator());
+      },
     );
   }
 }

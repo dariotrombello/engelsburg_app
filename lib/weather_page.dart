@@ -72,7 +72,8 @@ class _WeatherPageState extends State<WeatherPage> {
                     children: <Widget>[
                       Image.asset(
                         'assets/images/weather-background.jpg',
-                        height: 250,
+                        height: 300,
+                        width: MediaQuery.of(context).size.width,
                         fit: BoxFit.cover,
                       ),
                       Positioned.fill(
@@ -145,167 +146,42 @@ class _WeatherPageState extends State<WeatherPage> {
                                   padding: const EdgeInsets.only(right: 4.0),
                                   child: Column(
                                     children: <Widget>[
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Icon(WeatherIcons.thermometer),
-                                          Padding(
-                                            padding:
-                                                EdgeInsets.only(left: 16.0),
-                                          ),
-                                          Flexible(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Gefühlte Temperatur',
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                                Text(
-                                                  snapshot.data.current
-                                                          .feelsLike
-                                                          .round()
-                                                          .toString() +
-                                                      ' ℃',
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .caption
-                                                          .color),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                      _currentWeatherTile(
+                                          leading:
+                                              Icon(WeatherIcons.thermometer),
+                                          title: 'Gefühlte Temperatur',
+                                          subtitle: snapshot
+                                                  .data.current.feelsLike
+                                                  .round()
+                                                  .toString() +
+                                              ' ℃'),
                                       Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Icon(WeatherIcons.humidity),
-                                          Padding(
-                                            padding:
-                                                EdgeInsets.only(left: 16.0),
-                                          ),
-                                          Flexible(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Luftfeuchtigkeit',
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                                Text(
-                                                  snapshot.data.current.humidity
-                                                          .toString() +
-                                                      '%',
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .caption
-                                                          .color),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                      _currentWeatherTile(
+                                          leading: Icon(WeatherIcons.humidity),
+                                          title: 'Luftfeuchtigkeit',
+                                          subtitle: snapshot
+                                                  .data.current.humidity
+                                                  .toString() +
+                                              ' %'),
                                       Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Icon(WeatherIcons.barometer),
-                                          Padding(
-                                            padding:
-                                                EdgeInsets.only(left: 16.0),
-                                          ),
-                                          Flexible(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Luftdruck',
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                                Text(
-                                                  snapshot.data.current.pressure
-                                                          .round()
-                                                          .toString() +
-                                                      ' hPa',
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .caption
-                                                          .color),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                      _currentWeatherTile(
+                                          leading: Icon(WeatherIcons.barometer),
+                                          title: 'Luftdruck',
+                                          subtitle: snapshot
+                                                  .data.current.pressure
+                                                  .round()
+                                                  .toString() +
+                                              ' hPa'),
                                       Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Icon(WeatherIcons.umbrella),
-                                          Padding(
-                                            padding:
-                                                EdgeInsets.only(left: 16.0),
-                                          ),
-                                          Flexible(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  'UV-Index',
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                                Text(
-                                                  snapshot.data.current.uvi
-                                                      .round()
-                                                      .toString(),
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .caption
-                                                          .color),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                      _currentWeatherTile(
+                                          leading: Icon(WeatherIcons.umbrella),
+                                          title: 'UV-Index',
+                                          subtitle: snapshot.data.current.uvi
+                                              .round()
+                                              .toString()),
                                     ],
                                   ),
                                 ),
@@ -315,178 +191,50 @@ class _WeatherPageState extends State<WeatherPage> {
                                   padding: const EdgeInsets.only(left: 4.0),
                                   child: Column(
                                     children: <Widget>[
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Rotate(
+                                      _currentWeatherTile(
+                                          leading: Rotate(
                                             degree: snapshot
                                                 .data.current.windDeg
                                                 .toDouble(),
                                             child: Icon(WeatherIcons.wind),
                                           ),
-                                          Padding(
-                                            padding:
-                                                EdgeInsets.only(left: 16.0),
-                                          ),
-                                          Flexible(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Windgeschwindigkeit',
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                                Text(
-                                                  (snapshot.data.current
-                                                                  .windSpeed *
-                                                              3.6)
-                                                          .round()
-                                                          .toString() +
-                                                      ' km/h',
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .caption
-                                                          .color),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                          title: 'Windgeschwindigkeit',
+                                          subtitle:
+                                              (snapshot.data.current.windSpeed *
+                                                          3.6)
+                                                      .round()
+                                                      .toString() +
+                                                  ' km/h'),
                                       Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Icon(WeatherIcons
+                                      _currentWeatherTile(
+                                          leading: Icon(WeatherIcons
                                               .thermometer_exterior),
-                                          Padding(
-                                            padding:
-                                                EdgeInsets.only(left: 16.0),
-                                          ),
-                                          Flexible(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Taupunkt',
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                                Text(
-                                                  (snapshot.data.current
-                                                              .dewPoint
-                                                              .round())
-                                                          .toString() +
-                                                      ' ℃',
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .caption
-                                                          .color),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                          title: 'Taupunkt',
+                                          subtitle: (snapshot
+                                                      .data.current.dewPoint
+                                                      .round())
+                                                  .toString() +
+                                              ' ℃'),
                                       Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Icon(WeatherIcons.cloud),
-                                          Padding(
-                                            padding:
-                                                EdgeInsets.only(left: 16.0),
-                                          ),
-                                          Flexible(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Bewölkung',
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                                Text(
-                                                  snapshot.data.current.clouds
-                                                          .toString() +
-                                                      '%',
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .caption
-                                                          .color),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                      _currentWeatherTile(
+                                          leading: Icon(WeatherIcons.cloud),
+                                          title: 'Bewölkung',
+                                          subtitle: snapshot.data.current.clouds
+                                                  .toString() +
+                                              ' %'),
                                       Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Icon(WeatherIcons.fog),
-                                          Padding(
-                                            padding:
-                                                EdgeInsets.only(left: 16.0),
-                                          ),
-                                          Flexible(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Sichtweite',
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                                Text(
-                                                  (snapshot.data.current
-                                                                  .visibility /
-                                                              1000)
-                                                          .round()
-                                                          .toString() +
-                                                      ' km',
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .caption
-                                                          .color),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                      _currentWeatherTile(
+                                          leading: Icon(WeatherIcons.fog),
+                                          title: 'Sichtweite',
+                                          subtitle: (snapshot.data.current
+                                                          .visibility /
+                                                      1000)
+                                                  .round()
+                                                  .toString() +
+                                              ' km'),
                                     ],
                                   ),
                                 ),
@@ -509,19 +257,15 @@ class _WeatherPageState extends State<WeatherPage> {
                         Padding(
                           padding: EdgeInsets.only(top: 24.0),
                         ),
-                        SizedBox(
-                          height: 100,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: snapshot.data.hourly.length,
-                            itemBuilder: (context, index) {
-                              final hourly = snapshot.data.hourly[index];
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: snapshot.data.hourly.map((hourly) {
                               final hour = DateFormat('HH:mm').format(
                                   DateTime.fromMillisecondsSinceEpoch(
                                       hourly.dt * 1000));
                               final iconUrl =
                                   'https://openweathermap.org/img/wn/${hourly.weather.first.icon}@4x.png';
-
                               return Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
@@ -550,7 +294,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                   ),
                                 ],
                               );
-                            },
+                            }).toList(),
                           ),
                         ),
                         Padding(
@@ -615,173 +359,44 @@ class _WeatherPageState extends State<WeatherPage> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.stretch,
                                           children: <Widget>[
-                                            Card(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
+                                            _dailyWeatherCard(
+                                                leading:
                                                     Icon(WeatherIcons.umbrella),
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 16.0)),
-                                                    Flexible(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            'UV-Index',
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
-                                                          ),
-                                                          Text(daily.uvi
-                                                              .round()
-                                                              .toString()),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
+                                                title: 'UV-Index',
+                                                description: daily.uvi
+                                                    .round()
+                                                    .toString()),
+                                            _dailyWeatherCard(
+                                              leading: Icon(WeatherIcons.rain),
+                                              title:
+                                                  'Niederschlagswahrscheinlichkeit',
+                                              description: (daily.pop * 100)
+                                                      .round()
+                                                      .toString() +
+                                                  ' %',
                                             ),
-                                            Card(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
-                                                    Icon(WeatherIcons.rain),
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 16.0)),
-                                                    Flexible(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            'Niederschlagswahrscheinlichkeit',
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
-                                                          ),
-                                                          Text((daily.pop * 100)
-                                                                  .round()
-                                                                  .toString() +
-                                                              '%'),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
+                                            _dailyWeatherCard(
+                                                leading: Rotate(
+                                                  degree:
+                                                      daily.windDeg.toDouble(),
+                                                  child:
+                                                      Icon(WeatherIcons.wind),
                                                 ),
-                                              ),
-                                            ),
-                                            Card(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
-                                                    Rotate(
-                                                      degree: daily.windDeg
-                                                          .toDouble(),
-                                                      child: Icon(
-                                                          WeatherIcons.wind),
-                                                    ),
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 16.0)),
-                                                    Flexible(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            'Windgeschwindigkeit',
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
-                                                          ),
-                                                          Text((daily.windSpeed *
-                                                                      3.6)
-                                                                  .round()
-                                                                  .toString() +
-                                                              ' km/h'),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Card(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
+                                                title: 'Windgeschwindigkeit',
+                                                description:
+                                                    (daily.windSpeed * 3.6)
+                                                            .round()
+                                                            .toString() +
+                                                        ' km/h'),
+                                            _dailyWeatherCard(
+                                                leading:
                                                     Icon(WeatherIcons.sunrise),
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 16.0)),
-                                                    Flexible(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            'Sonnenaufgang',
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
-                                                          ),
-                                                          Text(DateFormat(
-                                                                  'HH:mm')
-                                                              .format(DateTime
-                                                                  .fromMillisecondsSinceEpoch(
-                                                                      daily.sunrise *
-                                                                          1000))),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
+                                                title: 'Sonnenaufgang',
+                                                description: DateFormat('HH:mm')
+                                                    .format(DateTime
+                                                        .fromMillisecondsSinceEpoch(
+                                                            daily.sunrise *
+                                                                1000))),
                                           ],
                                         ),
                                       ),
@@ -790,168 +405,38 @@ class _WeatherPageState extends State<WeatherPage> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.stretch,
                                           children: <Widget>[
-                                            Card(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
+                                            _dailyWeatherCard(
+                                                leading:
                                                     Icon(WeatherIcons.humidity),
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 16.0)),
-                                                    Flexible(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            'Luftfeuchtigkeit',
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
-                                                          ),
-                                                          Text(daily.humidity
-                                                                  .toString() +
-                                                              '%'),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Card(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
+                                                title: 'Luftfeuchtigkeit',
+                                                description:
+                                                    daily.humidity.toString() +
+                                                        ' %'),
+                                            _dailyWeatherCard(
+                                                leading:
                                                     Icon(WeatherIcons.cloud),
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 16.0)),
-                                                    Flexible(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            'Bewölkung',
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
-                                                          ),
-                                                          Text((daily.clouds)
-                                                                  .round()
-                                                                  .toString() +
-                                                              '%'),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Card(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
-                                                    Icon(
-                                                        WeatherIcons.barometer),
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 16.0)),
-                                                    Flexible(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            'Luftdruck',
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
-                                                          ),
-                                                          Text(daily.pressure
-                                                                  .round()
-                                                                  .toString() +
-                                                              ' hPa'),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Card(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
+                                                title: 'Bewölkung',
+                                                description: (daily.clouds)
+                                                        .round()
+                                                        .toString() +
+                                                    ' %'),
+                                            _dailyWeatherCard(
+                                                leading: Icon(
+                                                    WeatherIcons.barometer),
+                                                title: 'Luftdruck',
+                                                description: daily.pressure
+                                                        .round()
+                                                        .toString() +
+                                                    ' hPa'),
+                                            _dailyWeatherCard(
+                                                leading:
                                                     Icon(WeatherIcons.sunset),
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 16.0)),
-                                                    Flexible(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            'Sonnenuntergang',
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
-                                                          ),
-                                                          Text(DateFormat(
-                                                                  'HH:mm')
-                                                              .format(DateTime
-                                                                  .fromMillisecondsSinceEpoch(
-                                                                      daily.sunset *
-                                                                          1000))),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
+                                                title: 'Sonnenuntergang',
+                                                description: DateFormat('HH:mm')
+                                                    .format(DateTime
+                                                        .fromMillisecondsSinceEpoch(
+                                                            daily.sunset *
+                                                                1000))),
                                           ],
                                         ),
                                       )
@@ -977,6 +462,73 @@ class _WeatherPageState extends State<WeatherPage> {
           }
           return Center(child: CircularProgressIndicator());
         },
+      ),
+    );
+  }
+
+  Widget _currentWeatherTile({
+    @required Widget leading,
+    @required String title,
+    @required String subtitle,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        leading,
+        Padding(
+          padding: EdgeInsets.only(left: 16.0),
+        ),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              Text(
+                subtitle,
+                style:
+                    TextStyle(color: Theme.of(context).textTheme.caption.color),
+              ),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _dailyWeatherCard({
+    @required Widget leading,
+    @required String title,
+    @required String description,
+  }) {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            leading,
+            Padding(padding: EdgeInsets.only(left: 16.0)),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  Text(description),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -45,7 +45,7 @@ class EngelsburgApp extends StatefulWidget {
 }
 
 class _EngelsburgAppState extends State<EngelsburgApp> {
-  int _currentIndex = 0;
+  var _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {

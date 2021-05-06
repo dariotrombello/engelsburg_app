@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:engelsburg_app/main.dart';
+import 'package:engelsburg_app/utils/time_ago.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:html_unescape/html_unescape.dart';
-import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:share/share.dart';
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 import 'models/wordpress.dart';
 
@@ -21,61 +26,90 @@ class NewsPageState extends State<NewsPage> {
   }
 
   Widget _postCard({
-    final String content,
-    final DateTime date,
-    final String featuredMedia,
-    final String title,
+    final Post post,
   }) {
     final renderedContent = HtmlUnescape()
-        .convert(content)
+        .convert(post.content.rendered)
+        // remove all newlines
+        .replaceAll(RegExp(r'[\n]+'), ' ')
+        // remove all html tags
         .replaceAll(RegExp(r'<[^>]*>'), '')
         .trim();
-    final renderedTitle =
-        HtmlUnescape().convert(title).replaceAll(RegExp(r'<[^>]*>'), '').trim();
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(4.0),
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (BuildContext context) => NewsDetailPage(
-                content: content,
-                date: date,
-                featuredMedia: featuredMedia,
-                title: renderedTitle),
-          ));
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (featuredMedia != null)
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(4.0),
-                    topRight: Radius.circular(4.0)),
-                child: CachedNetworkImage(
-                  imageUrl: featuredMedia,
-                  placeholder: (context, url) => Container(),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
+    final renderedTitle = HtmlUnescape()
+        .convert(post.title.rendered)
+        .replaceAll(RegExp(r'[\n]+'), ' ')
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .trim();
+    final dateFormat = DateFormat('dd.MM.yyyy, HH:mm', Platform.localeName);
+    final featuredMedia = post.embedded.wpFeaturedmedia?.first?.sourceUrl;
+
+    return Align(
+      alignment: Alignment.center,
+      child: SizedBox(
+        width: 400,
+        child: Card(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(4.0),
+            onTap: () {
+              SharedPrefs.instance.clear();
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (BuildContext context) => NewsDetailPage(
+                  post: post,
+                  dateFormat: dateFormat,
+                  featuredMedia: featuredMedia,
                 ),
-              ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
-              child: Text(
-                renderedTitle.toString(),
-                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18.0),
-              ),
+              ));
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (featuredMedia != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(4.0),
+                        topRight: Radius.circular(4.0)),
+                    child: CachedNetworkImage(
+                      imageUrl: featuredMedia,
+                      placeholder: (context, url) => Container(),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+                  child: Text(
+                    renderedTitle.toString(),
+                    style:
+                        TextStyle(fontWeight: FontWeight.w500, fontSize: 18.0),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    renderedContent.toString(),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(height: 1.5),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(TimeAgo.format(post.date)),
+                      IconButton(
+                          tooltip: 'Teilen',
+                          icon: Icon(Icons.share),
+                          onPressed: () {
+                            Share.share(post.link);
+                          }),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                renderedContent.toString(),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(height: 1.5),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -96,17 +130,9 @@ class NewsPageState extends State<NewsPage> {
               padding: EdgeInsets.all(16.0),
               itemCount: posts.length,
               itemBuilder: (context, index) {
-                final content = posts[index].content.rendered.toString();
-                final date = posts[index].date;
-                final featuredMedia =
-                    posts[index].embedded.wpFeaturedmedia?.first?.sourceUrl;
-                final title = posts[index].title.rendered.toString();
-
+                final post = posts[index];
                 return _postCard(
-                  content: content,
-                  date: date,
-                  featuredMedia: featuredMedia,
-                  title: title,
+                  post: post,
                 );
               },
             ),
@@ -121,15 +147,14 @@ class NewsPageState extends State<NewsPage> {
 }
 
 class NewsDetailPage extends StatelessWidget {
-  final String content;
-  final DateTime date;
+  final Post post;
+  final DateFormat dateFormat;
   final String featuredMedia;
-  final String title;
+
   NewsDetailPage({
-    @required this.content,
-    this.date,
+    @required this.post,
+    @required this.dateFormat,
     this.featuredMedia,
-    @required this.title,
   });
 
   @override
@@ -150,15 +175,15 @@ class NewsDetailPage extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              title,
+              post.title.rendered,
               style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
             ),
           ),
-          if (date != null)
+          if (post.date != null)
             Padding(
               padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
               child: Text(
-                DateFormat('dd.MM.yyyy, HH:mm').format(date),
+                dateFormat.format(post.date),
                 style: TextStyle(
                     color: Theme.of(context).textTheme.headline1.color),
               ),
@@ -167,9 +192,9 @@ class NewsDetailPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: HtmlWidget(
-              content,
+              post.content.rendered,
               textStyle: TextStyle(
-                  fontSize: 16.0, height: 1.5, fontFamily: 'Roboto Slab'),
+                  fontSize: 15.0, height: 1.5, fontFamily: 'Roboto Slab'),
               onTapUrl: (url) => url_launcher.launch(url),
             ),
           )

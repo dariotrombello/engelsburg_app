@@ -14,8 +14,8 @@ class AboutPage extends StatefulWidget {
 
 class _AboutPageState extends State<AboutPage> {
   // Notiz, dass die App nicht von der Schule ist, MUSS erhalten bleiben.
-  final String appDescription =
-      'Eine App von Dario Trombello (Englisch-LK CAW), die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.';
+  final appDescription =
+      'Eine App von Dario Trombello (E2, Englisch-LK CAW), die Informationen über das Engelsburg-Gymnasium übersichtlich zusammenstellt.';
 
   // Die Strings werden geändert, wenn PackageInfo die Daten der App geladen hat.
   var _packageInfo = PackageInfo(

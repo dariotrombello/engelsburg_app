@@ -9,10 +9,10 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _substitutionSettingsChanged = false;
-  List<String> _allClasses = [];
+  var _substitutionSettingsChanged = false;
+  var _allClasses = <String>[];
   Future _getSettings;
-  final TextEditingController _textEditingController = TextEditingController();
+  final _textEditingController = TextEditingController();
   final _prefs = SharedPrefs.instance;
 
   @override
@@ -98,75 +98,69 @@ class _SettingsPageState extends State<SettingsPage> {
                       _prefs.setBool('teacherSelected', true);
                       setState(() => _substitutionSettingsChanged = true);
                     }),
-                _isFiltered &&
-                        !_teacherSelected &&
-                        _allClasses.sublist(1).contains(_selected)
-                    ? Center(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          decoration: ShapeDecoration(
-                              shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                      width: 1.0, color: Colors.grey),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(4.0)))),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                                items: _allClasses
-                                    .sublist(1)
-                                    .map((String item) =>
-                                        DropdownMenuItem<String>(
-                                            value: item, child: Text(item)))
-                                    .toList(),
-                                onChanged: (value) {
-                                  _prefs.setString('substitutionFilter', value);
-                                  setState(() =>
-                                      _substitutionSettingsChanged = true);
-                                },
-                                value: _allClasses.contains(_selected)
-                                    ? _selected
-                                    : _allClasses[1]),
-                          ),
-                        ),
-                      )
-                    : Container(),
-                _isFiltered && _teacherSelected
-                    ? TextField(
-                        controller: _textEditingController,
-                        decoration:
-                            InputDecoration(border: OutlineInputBorder()),
-                        onChanged: (value) {
-                          _prefs.setString('substitutionFilter', value);
-                          setState(() => _substitutionSettingsChanged = true);
-                        },
-                      )
-                    : Container(),
-                _substitutionSettingsChanged
-                    ? Padding(
-                        padding: EdgeInsets.only(top: 16.0),
-                        child: Card(
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Row(
-                              children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.only(right: 16.0),
-                                  child: Icon(
-                                    Icons.warning,
-                                    color: Colors.yellow,
-                                  ),
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    'Nach Änderung der Einstellungen für den Vertretungsplan ist ein Neustart der App notwendig.',
-                                  ),
-                                ),
-                              ],
+                if (_isFiltered &&
+                    !_teacherSelected &&
+                    _allClasses.sublist(1).contains(_selected))
+                  Center(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      decoration: ShapeDecoration(
+                          shape: RoundedRectangleBorder(
+                              side: BorderSide(width: 1.0, color: Colors.grey),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(4.0)))),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                            items: _allClasses
+                                .sublist(1)
+                                .map((String item) => DropdownMenuItem<String>(
+                                    value: item, child: Text(item)))
+                                .toList(),
+                            onChanged: (value) {
+                              _prefs.setString('substitutionFilter', value);
+                              setState(
+                                  () => _substitutionSettingsChanged = true);
+                            },
+                            value: _allClasses.contains(_selected)
+                                ? _selected
+                                : _allClasses[1]),
+                      ),
+                    ),
+                  ),
+                if (_isFiltered && _teacherSelected)
+                  TextField(
+                    controller: _textEditingController,
+                    decoration: InputDecoration(border: OutlineInputBorder()),
+                    onChanged: (value) {
+                      _prefs.setString('substitutionFilter', value);
+                      setState(() => _substitutionSettingsChanged = true);
+                    },
+                  ),
+                if (_substitutionSettingsChanged)
+                  Padding(
+                    padding: EdgeInsets.only(top: 16.0),
+                    child: Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(right: 16.0),
+                              child: Icon(
+                                Icons.warning,
+                                color: Colors.yellow,
+                              ),
                             ),
-                          ),
+                            Flexible(
+                              child: Text(
+                                'Nach Änderung der Einstellungen für den Vertretungsplan ist ein Neustart der App notwendig.',
+                              ),
+                            ),
+                          ],
                         ),
-                      )
-                    : Container()
+                      ),
+                    ),
+                  )
               ],
             );
           } else {

@@ -11,7 +11,7 @@ class CafeteriaPage extends StatefulWidget {
 
 class _CafeteriaPageState extends State<CafeteriaPage> {
   Future<List<String>> _getCafeteriaPlan() async {
-    final _cafeteriaDetailList = <String>[];
+    final cafeteriaDetailList = <String>[];
     final url =
         Uri.parse('https://engelsburg.smmp.de/leben-an-der-schule/cafeteria/');
     final res = await http.get(url);
@@ -19,7 +19,7 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
     final cafeteria = document.querySelectorAll('div.entry-content > p');
     for (var cafeteriaDetail in cafeteria) {
       if (cafeteriaDetail.text.trim().isNotEmpty) {
-        _cafeteriaDetailList.add(
+        cafeteriaDetailList.add(
           HtmlUnescape()
               .convert(cafeteriaDetail.outerHtml.replaceAll('<br>', '\n'))
               .replaceAll(RegExp(r'<[^>]*>'), '')
@@ -27,7 +27,7 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
         );
       }
     }
-    return _cafeteriaDetailList;
+    return cafeteriaDetailList;
   }
 
   @override
