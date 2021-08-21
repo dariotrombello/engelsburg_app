@@ -1,3 +1,4 @@
+import 'package:engelsburg_app/pages/cateteria_page.dart';
 import 'package:engelsburg_app/pages/news_page.dart';
 import 'package:flutter/material.dart';
 
@@ -10,11 +11,12 @@ class AppConstants {
   static const about = 'Über';
   static const bottomNavigationBarItems = [
     BottomNavigationBarItem(label: 'News', icon: Icon(Icons.library_books)),
-    BottomNavigationBarItem(label: 'Test', icon: Icon(Icons.flutter_dash)),
+    BottomNavigationBarItem(
+        label: 'Cafeteria', icon: Icon(Icons.restaurant_menu)),
   ];
   static const bottomNavigationBarPages = <Widget>[
     NewsPage(),
-    Center(child: Text('')),
+    CafeteriaPage(),
   ];
   static const openInBrowser = 'Im Browser öffnen';
   static const share = 'Teilen';
@@ -61,4 +63,5 @@ class AppConstants {
   static const darioEmail = 'info@dariotrombello.com';
   static const openSourceLicenses = 'Open-Source-Lizenzen';
   static const source = 'Quelle';
+  static const dataOfSolarPanel = 'Daten der Solaranlage';
 }

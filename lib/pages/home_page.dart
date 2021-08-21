@@ -2,6 +2,7 @@ import 'package:engelsburg_app/constants/app_constants.dart';
 import 'package:engelsburg_app/pages/about_page.dart';
 import 'package:engelsburg_app/pages/events_page.dart';
 import 'package:engelsburg_app/pages/settings_page.dart';
+import 'package:engelsburg_app/pages/solar_panel_page.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -36,6 +37,14 @@ class _HomePageState extends State<HomePage> {
           const DrawerHeader(
             margin: EdgeInsets.zero,
             child: Text(AppConstants.appName),
+          ),
+          ListTile(
+            leading: const Icon(Icons.wb_sunny),
+            title: const Text(AppConstants.dataOfSolarPanel),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const SolarPanelPage()));
+            },
           ),
           ListTile(
             leading: const Icon(Icons.watch_later),
