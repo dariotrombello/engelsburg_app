@@ -10,8 +10,4 @@ class ApiConstants {
   static const engelsburgApiSolarSystemUrl =
       engelsburgApiBaseUrl + '/solar_system';
 
-  static const engelsburgWpJsonBaseUrl =
-      'https://engelsburg.smmp.de/wp-json/wp/v2';
-  static const engelsburgWpJsonSolarPanelDescriptionUrl =
-      engelsburgWpJsonBaseUrl + '/pages/68';
 }

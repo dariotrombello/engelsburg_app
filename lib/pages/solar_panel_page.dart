@@ -1,5 +1,4 @@
 import 'package:engelsburg_app/models/engelsburg_api/solar_panel.dart';
-import 'package:engelsburg_app/models/wordpress/page.dart';
 import 'package:engelsburg_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -20,7 +19,7 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
         title: const Text('Daten der Solaranlage'),
       ),
       body: FutureBuilder<SolarPanel>(
-        future: ApiService.getSolarPanelData(),
+        future: ApiService.getSolarSystemData(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final solarPanelData = snapshot.data;
@@ -61,25 +60,12 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
                     );
                   }),
                 ),
-                FutureBuilder<WpPage>(
-                  future: ApiService.getSolarPanelDescription(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      final html =
-                          (snapshot.data?.content?.rendered).toString();
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 32.0),
-                        child: HtmlWidget(
-                          html,
-                          textStyle:
-                              const TextStyle(height: 1.5, fontSize: 18.0),
-                        ),
-                      );
-                    }
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  },
+                Padding(
+                  padding: const EdgeInsets.only(top: 32.0),
+                  child: HtmlWidget(
+                    (snapshot.data?.text).toString(),
+                    textStyle: const TextStyle(height: 1.5, fontSize: 18.0),
+                  ),
                 )
               ],
             );

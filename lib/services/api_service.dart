@@ -5,7 +5,6 @@ import 'package:engelsburg_app/models/engelsburg_api/articles.dart';
 import 'package:engelsburg_app/models/engelsburg_api/cafeteria.dart';
 import 'package:engelsburg_app/models/engelsburg_api/events.dart';
 import 'package:engelsburg_app/models/engelsburg_api/solar_panel.dart';
-import 'package:engelsburg_app/models/wordpress/page.dart';
 import 'package:engelsburg_app/services/shared_prefs.dart';
 import 'package:http/http.dart' as http;
 
@@ -70,7 +69,7 @@ class ApiService {
     return cafeteria;
   }
 
-  static Future<SolarPanel> getSolarPanelData() async {
+  static Future<SolarPanel> getSolarSystemData() async {
     final uri = Uri.parse(ApiConstants.engelsburgApiSolarSystemUrl);
     final body = await cachedGet(
         uri: uri,
@@ -81,14 +80,4 @@ class ApiService {
     return solarPanel;
   }
 
-  static Future<WpPage> getSolarPanelDescription() async {
-    final uri = Uri.parse(ApiConstants.engelsburgWpJsonSolarPanelDescriptionUrl);
-    final body = await cachedGet(
-        uri: uri,
-        cacheKey: 'solar_panel_description_json',
-        headers: ApiConstants.unauthenticatedEngelsburgApiHeaders);
-    final json = jsonDecode(body);
-    final page = WpPage.fromJson(json);
-    return page;
-  }
 }
