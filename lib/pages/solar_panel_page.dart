@@ -1,3 +1,4 @@
+import 'package:engelsburg_app/models/engelsburg_api/result.dart';
 import 'package:engelsburg_app/models/engelsburg_api/solar_panel.dart';
 import 'package:engelsburg_app/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -18,20 +19,22 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
         centerTitle: true,
         title: const Text('Daten der Solaranlage'),
       ),
-      body: FutureBuilder<SolarPanel>(
+      body: FutureBuilder<Result>(
         future: ApiService.getSolarSystemData(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final solarPanelData = snapshot.data;
+            final solarPanelData = snapshot.data!.onError((error) => {
+              //TODO: implement errors
+            }).handleUnexpectedError().parse((json) => SolarPanel.fromJson(json!));
             final _iconBoxes = [
               _iconBox(const Icon(Icons.calendar_today, size: 56), 'Datum',
-                  (solarPanelData?.date).toString()),
+                  (solarPanelData.date).toString()),
               _iconBox(const Icon(Icons.lightbulb_outline, size: 56), 'Energie',
-                  (solarPanelData?.energy).toString()),
+                  (solarPanelData.energy).toString()),
               _iconBox(const Icon(Icons.landscape, size: 56), 'Vermiedenes CO2',
-                  (solarPanelData?.co2Avoidance).toString()),
+                  (solarPanelData.co2Avoidance).toString()),
               _iconBox(const Icon(Icons.monetization_on, size: 56), 'Vergütung',
-                  (solarPanelData?.payment).toString() + '€'),
+                  (solarPanelData.payment).toString() + '€'),
             ];
 
             return ListView(
@@ -63,7 +66,7 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
                 Padding(
                   padding: const EdgeInsets.only(top: 32.0),
                   child: HtmlWidget(
-                    (snapshot.data?.text).toString(),
+                    (solarPanelData.text).toString(),
                     textStyle: const TextStyle(height: 1.5, fontSize: 18.0),
                   ),
                 )

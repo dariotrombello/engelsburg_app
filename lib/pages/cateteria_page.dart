@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:engelsburg_app/models/engelsburg_api/cafeteria.dart';
+import 'package:engelsburg_app/models/engelsburg_api/result.dart';
 import 'package:engelsburg_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -19,11 +22,13 @@ class _CafeteriaPageState extends State<CafeteriaPage>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      body: FutureBuilder<Cafeteria>(
+      body: FutureBuilder<Result>(
         future: ApiService.getCafeteria(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final html = (snapshot.data?.content).toString();
+            final html = snapshot.data!.onError((error) => {
+              //TODO: implement errors
+            }).handleUnexpectedError().parse((json) => json!['content']);
 
             return SingleChildScrollView(
               child: Padding(
