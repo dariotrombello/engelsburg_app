@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:http/http.dart';
+
 class Result {
 
-  Result._result(Map<String, dynamic> result);
-  Result._error(ApiError apiError);
+  Result._of(this.result);
+  Result._error(this.error);
   Result._empty();
 
   Map<String, dynamic>? result;
@@ -15,7 +19,7 @@ class Result {
     return result != null;
   }
 
-  factory Result.of(Map<String, dynamic> result) => Result._result(result);
+  factory Result.of(Map<String, dynamic> result) => Result._of(result);
   factory Result.error(ApiError apiError) => Result._error(apiError);
   factory Result.empty() => Result._empty();
 
@@ -23,8 +27,10 @@ class Result {
     if (resultPresent()) f(result!);
   }
 
-  T parse<T>(T Function(Map<String, dynamic>?) f) {
-    return f(result);
+  T parse<T>(T Function(Map<String, dynamic>) f) {
+    result ??= {};
+
+    return f(result!);
   }
 
   Result onError(Function(ApiError) f) {
@@ -71,6 +77,19 @@ class ApiError {
   String? extra;
 
   ApiError({this.status, this.messageKey, this.extra});
+
+  factory ApiError.tryDecode(Response response) {
+    try {
+      if (response.body.isNotEmpty) {
+        Map<String, dynamic> json = jsonDecode(response.body);
+        if (json.containsKey("status")) {
+          return ApiError.fromJson(json);
+        }
+      }
+    } catch (_) {}
+
+    return ApiError.fromStatus(response.statusCode);
+  }
 
   factory ApiError.fromJson(Map<String, dynamic> json) => ApiError(
       status: json['status'],

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:engelsburg_app/constants/api_constants.dart';
-import 'package:engelsburg_app/models/engelsburg_api/result.dart';
+import 'package:engelsburg_app/models/result.dart';
 import 'package:engelsburg_app/services/shared_prefs.dart';
 import 'package:http/http.dart' as http;
 
@@ -37,10 +37,7 @@ class ApiService {
       }
 
       if (!res.statusCode.toString().startsWith('2')) {//Check for error
-        result = Result.error(res.body.isEmpty
-            ? ApiError.fromStatus(res.statusCode)
-            : ApiError.fromJson(jsonDecode(res.body))
-        );
+        result = Result.error(ApiError.tryDecode(res));
       } else {//Body present or not?
         result = res.body.isEmpty
             ? Result.empty()

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:engelsburg_app/models/engelsburg_api/articles.dart';
-import 'package:engelsburg_app/models/engelsburg_api/result.dart';
+import 'package:engelsburg_app/models/result.dart';
 import 'package:engelsburg_app/pages/post_detail_page.dart';
 import 'package:engelsburg_app/services/api_service.dart';
 import 'package:engelsburg_app/utils/html.dart';
@@ -32,8 +32,7 @@ class _NewsPageState extends State<NewsPage>
         if (snapshot.hasData) {
           final articles = snapshot.data!.onError((error) => {
             //TODO: implement errors
-            print(jsonEncode(error))
-          }).handleUnexpectedError().parse((json) => Articles.fromJson(json!).articles);
+          }).handleUnexpectedError().parse((json) => Articles.fromJson(json).articles);
           return ListView.separated(
               itemBuilder: (context, index) {
                 final article = articles[index];

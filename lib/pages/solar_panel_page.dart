@@ -1,4 +1,4 @@
-import 'package:engelsburg_app/models/engelsburg_api/result.dart';
+import 'package:engelsburg_app/models/result.dart';
 import 'package:engelsburg_app/models/engelsburg_api/solar_panel.dart';
 import 'package:engelsburg_app/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +25,7 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
           if (snapshot.hasData) {
             final solarPanelData = snapshot.data!.onError((error) => {
               //TODO: implement errors
-            }).handleUnexpectedError().parse((json) => SolarPanel.fromJson(json!));
+            }).handleUnexpectedError().parse((json) => SolarPanel.fromJson(json));
             final _iconBoxes = [
               _iconBox(const Icon(Icons.calendar_today, size: 56), 'Datum',
                   (solarPanelData.date).toString()),
