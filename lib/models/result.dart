@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
 class Result {
@@ -22,24 +24,29 @@ class Result {
   factory Result.of(Map<String, dynamic> result) => Result._of(result);
   factory Result.error(ApiError apiError) => Result._error(apiError);
   factory Result.empty() => Result._empty();
+  static final expectEmpty = Result.empty();
 
-  void onResult(Function(Map<String, dynamic>) f) {
-    if (resultPresent()) f(result!);
+  Widget handle<T>(
+      T Function(Map<String, dynamic>) parse,
+      Widget? Function(ApiError)? onError,
+      Widget Function(T) onSuccess
+      ) {
+    Widget? ret;
+    if (errorPresent()) {//If error occurred
+      if (onError != null) ret = onError(error!);//Error which could be thrown
+      return ret ?? handleCommonError();//If error wasn't handled
+    } else {
+      if (resultPresent() && T is! Result) {//If result present and valid parse function specified
+        return onSuccess(parse(result!));//Return Widget function onSuccess with parsed result
+      } else if (T is Result) {//Otherwise if empty result is expected
+        return onSuccess(expectEmpty as T);//Return onSuccess without parse
+      } else {//If nothing handled, try common errors
+        return handleCommonError();
+      }
+    }
   }
 
-  T parse<T>(T Function(Map<String, dynamic>) f) {
-    result ??= {};
-
-    return f(result!);
-  }
-
-  Result onError(Function(ApiError) f) {
-    if (errorPresent()) f(error!);
-
-    return this;
-  }
-
-  Result handleUnexpectedError() {
+  Widget handleCommonError() {
     if (errorPresent()) {//Handle errors
       if (error!.status == 0) { //Custom status to handle fetching errors
         //TODO: no network connection, error fetching
@@ -65,7 +72,11 @@ class Result {
       //TODO: handle unexpected error
     }
 
-    return this;
+    return _handleUnexpectedError();//TODO:
+  }
+
+  Widget _handleUnexpectedError() {
+    return const CircularProgressIndicator();//TODO:
   }
 
 }

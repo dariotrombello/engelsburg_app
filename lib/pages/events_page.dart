@@ -18,24 +18,29 @@ class EventsPage extends StatelessWidget {
         future: ApiService.getEvents(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final events = snapshot.data!.onError((error) => {
-              //TODO: implement errors
-            }).handleUnexpectedError().parse((json) => Events.fromJson(json));
-            return ListView.separated(
-              itemBuilder: (context, index) {
-                final event = events.events[index];
-                return ListTile(
-                  title: Text(event.title.toString()),
-                  subtitle: event.date == null
-                      ? null
-                      : Text(_dateFormat.format(event.date as DateTime)),
-                );
-              },
-              separatorBuilder: (context, index) {
-                return const Divider(height: 0);
-              },
-              itemCount: events.events.length,
-            );
+            return snapshot.data!.handle((json) => Events.fromJson(json),
+                    (error) {
+                      //TODO: implement errors
+                    },
+                    (events) {
+                      events = events as Events;
+
+                      return ListView.separated(
+                        itemBuilder: (context, index) {
+                          final event = (events as Events).events[index];
+                          return ListTile(
+                            title: Text(event.title.toString()),
+                            subtitle: event.date == null
+                                ? null
+                                : Text(_dateFormat.format(event.date as DateTime)),
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return const Divider(height: 0);
+                        },
+                        itemCount: events.events.length,
+                      );
+                    });
           }
           return const Center(
             child: CircularProgressIndicator(),

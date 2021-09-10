@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:engelsburg_app/models/engelsburg_api/articles.dart';
 import 'package:engelsburg_app/models/result.dart';
@@ -30,18 +28,28 @@ class _NewsPageState extends State<NewsPage>
       future: ApiService.getArticles(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final articles = snapshot.data!.onError((error) => {
-            //TODO: implement errors
-          }).handleUnexpectedError().parse((json) => Articles.fromJson(json).articles);
-          return ListView.separated(
-              itemBuilder: (context, index) {
-                final article = articles[index];
-                return _newsCard(article);
-              },
-              separatorBuilder: (context, index) {
-                return const Divider(height: 0);
-              },
-              itemCount: articles.length);
+          return snapshot.data!.handle((json) => Articles.fromJson(json).articles,
+                  (error) {
+                    //TODO: implement errors
+                    if (error.status == 404 && error.messageKey == "NOT_FOUND") {
+                      return const Center(
+                        child: Text('No articles found!'),
+                      );
+                    }
+                  },
+                  (articles) {
+                    articles = articles as List<Article>;
+
+                    return ListView.separated(
+                        itemBuilder: (context, index) {
+                          final article = (articles as List<Article>)[index];
+                          return _newsCard(article);
+                        },
+                        separatorBuilder: (context, index) {
+                          return const Divider(height: 0);
+                        },
+                        itemCount: articles.length);
+                  });
         }
         return const Center(
           child: CircularProgressIndicator(),
