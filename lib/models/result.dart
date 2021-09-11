@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:engelsburg_app/constants/app_constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -51,9 +52,6 @@ class Result {
       if (error!.status == 0) { //Custom status to handle fetching errors
         //TODO: no network connection, error fetching
       } else if (error!.status == 400) {
-        if (error!.messageKey == 'INVALID_PARAM') {
-          //TODO: something went wrong
-        }
         if (error!.extra == 'token') {
           if (error!.messageKey == 'EXPIRED')  {
             //TODO: get new JWT
@@ -65,29 +63,25 @@ class Result {
         //TODO: need to be logged in
       } else if (error!.status == 403) {
         //TODO: don't permitted
-      } else if (error!.status == 500) {
-        //TODO: something wen't wrong (internal server error)
       }
-
-      //TODO: handle unexpected error
     }
 
-    return _handleUnexpectedError();//TODO:
+    return _handleUnexpectedError();
   }
 
   Widget _handleUnexpectedError() {
-    return const CircularProgressIndicator();//TODO:
+    return ApiError.errorBox(AppConstants.unexpectedError);
   }
 
 }
 
 class ApiError {
 
-  int? status;
-  String? messageKey;
-  String? extra;
+  int status;
+  String messageKey;
+  String extra;
 
-  ApiError({this.status, this.messageKey, this.extra});
+  ApiError({required this.status, this.messageKey = '', this.extra = ''});
 
   factory ApiError.tryDecode(Response response) {
     try {
@@ -109,5 +103,40 @@ class ApiError {
   );
 
   factory ApiError.fromStatus(int status) => ApiError(status: status);
+
+  static Widget errorBox(String text) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 40, left: 40, right: 40),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(64, 255, 125, 125),
+            border: Border.all(color: const Color.fromARGB(125, 255, 0, 0)),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Text(AppConstants.error.toUpperCase() + ':', textScaleFactor: 1.3),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(text),
+              )
+            ],
+            mainAxisSize: MainAxisSize.min,
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool isNotFound() {
+    return status == 404 && messageKey == 'NOT_FOUND';
+  }
+
+  bool isAlreadyExisting() {
+    return status == 409 && messageKey == 'ALREADY_EXISTS';
+  }
 
 }

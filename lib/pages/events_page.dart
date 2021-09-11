@@ -18,16 +18,16 @@ class EventsPage extends StatelessWidget {
         future: ApiService.getEvents(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return snapshot.data!.handle((json) => Events.fromJson(json),
+            return snapshot.data!.handle<Events>((json) => Events.fromJson(json),
                     (error) {
-                      //TODO: implement errors
+                      if (error.isNotFound()) {
+                        return ApiError.errorBox('Events not found!');
+                      }
                     },
                     (events) {
-                      events = events as Events;
-
                       return ListView.separated(
                         itemBuilder: (context, index) {
-                          final event = (events as Events).events[index];
+                          final event = events.events[index];
                           return ListTile(
                             title: Text(event.title.toString()),
                             subtitle: event.date == null

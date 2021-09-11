@@ -23,15 +23,17 @@ class _CafeteriaPageState extends State<CafeteriaPage>
         future: ApiService.getCafeteria(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return snapshot.data!.handle((json) => json['content'] as String,
+            return snapshot.data!.handle<String>((json) => json['content'],
                     (error) {
-                      //TODO: implement errors
+                      if (error.isNotFound()) {
+                        return ApiError.errorBox('Cafeteria page not found!');
+                      }
                     },
                     (content) {
                       return SingleChildScrollView(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: HtmlWidget(content as String),
+                          child: HtmlWidget(content),
                         ),
                       );
                     });

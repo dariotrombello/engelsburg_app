@@ -23,13 +23,13 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
         future: ApiService.getSolarSystemData(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return snapshot.data!.handle((json) => SolarPanel.fromJson(json),
+            return snapshot.data!.handle<SolarPanel>((json) => SolarPanel.fromJson(json),
                     (error) {
-                      //TODO: implement errors
+                      if (error.isNotFound()) {
+                        return ApiError.errorBox('Solar panel page not found!');
+                      }
                     },
                     (solarPanelData) {
-                      solarPanelData = solarPanelData as SolarPanel;
-
                       final _iconBoxes = [
                         _iconBox(const Icon(Icons.calendar_today, size: 56), 'Datum',
                             (solarPanelData.date).toString()),
