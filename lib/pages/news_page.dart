@@ -8,7 +8,7 @@ import 'package:engelsburg_app/utils/random_string.dart';
 import 'package:engelsburg_app/utils/time_ago.dart';
 import 'package:flutter/material.dart';
 import 'package:octo_image/octo_image.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({Key? key}) : super(key: key);
@@ -29,23 +29,22 @@ class _NewsPageState extends State<NewsPage>
       future: ApiService.getArticles(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return snapshot.data!.handle<List<Article>>((json) => Articles.fromJson(json).articles,
-                  (error) {
-                    if (error.isNotFound()) {
-                      return ApiError.errorBox('Articles not found!');
-                    }
-                  },
-                  (articles) {
-                    return ListView.separated(
-                        itemBuilder: (context, index) {
-                          final article = articles[index];
-                          return _newsCard(article);
-                        },
-                        separatorBuilder: (context, index) {
-                          return const Divider(height: 0);
-                        },
-                        itemCount: articles.length);
-                  });
+          return snapshot.data!.handle<List<Article>>(
+              (json) => Articles.fromJson(json).articles, (error) {
+            if (error.isNotFound()) {
+              return ApiError.errorBox('Articles not found!');
+            }
+          }, (articles) {
+            return ListView.separated(
+                itemBuilder: (context, index) {
+                  final article = articles[index];
+                  return _newsCard(article);
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider(height: 0);
+                },
+                itemCount: articles.length);
+          });
         }
         return const Center(
           child: CircularProgressIndicator(),

@@ -4,7 +4,7 @@ import 'package:engelsburg_app/constants/app_constants.dart';
 import 'package:engelsburg_app/constants/asset_path_constants.dart';
 import 'package:engelsburg_app/pages/about_school_page.dart';
 import 'package:flutter/material.dart';
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class AboutPage extends StatelessWidget {
