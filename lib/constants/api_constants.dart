@@ -3,7 +3,7 @@ class ApiConstants {
     'Content-Type': 'application/json; charset=utf-8',
     'Accept': 'application/json'
   };
-  static const engelsburgApiBaseUrl = 'https://paulhuerkamp.de';
+  static const engelsburgApiBaseUrl = 'https://engelsburg-api.de';
   static const engelsburgApiEventsUrl = engelsburgApiBaseUrl + '/event';
   static const engelsburgApiArticlesUrl = engelsburgApiBaseUrl + '/article';
   static const engelsburgApiCafeteriaUrl = engelsburgApiBaseUrl + '/cafeteria';

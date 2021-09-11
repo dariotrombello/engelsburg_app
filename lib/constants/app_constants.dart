@@ -64,4 +64,7 @@ class AppConstants {
   static const openSourceLicenses = 'Open-Source-Lizenzen';
   static const source = 'Quelle';
   static const dataOfSolarPanel = 'Daten der Solaranlage';
+  static const unexpectedError = 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen sie es ein wenig später erneut.';
+  static const error = 'Fehler';
+
 }

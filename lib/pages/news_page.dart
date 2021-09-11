@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:engelsburg_app/models/engelsburg_api/articles.dart';
+import 'package:engelsburg_app/models/result.dart';
 import 'package:engelsburg_app/pages/post_detail_page.dart';
 import 'package:engelsburg_app/services/api_service.dart';
 import 'package:engelsburg_app/utils/html.dart';
@@ -23,20 +24,27 @@ class _NewsPageState extends State<NewsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return FutureBuilder<Articles>(
+    return FutureBuilder<Result>(
       future: ApiService.getArticles(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final articles = snapshot.data!.articles;
-          return ListView.separated(
-              itemBuilder: (context, index) {
-                final article = articles[index];
-                return _newsCard(article);
-              },
-              separatorBuilder: (context, index) {
-                return const Divider(height: 0);
-              },
-              itemCount: articles.length);
+          return snapshot.data!.handle<List<Article>>((json) => Articles.fromJson(json).articles,
+                  (error) {
+                    if (error.isNotFound()) {
+                      return ApiError.errorBox('Articles not found!');
+                    }
+                  },
+                  (articles) {
+                    return ListView.separated(
+                        itemBuilder: (context, index) {
+                          final article = articles[index];
+                          return _newsCard(article);
+                        },
+                        separatorBuilder: (context, index) {
+                          return const Divider(height: 0);
+                        },
+                        itemCount: articles.length);
+                  });
         }
         return const Center(
           child: CircularProgressIndicator(),

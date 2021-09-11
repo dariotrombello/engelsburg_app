@@ -1,3 +1,4 @@
+import 'package:engelsburg_app/models/result.dart';
 import 'package:engelsburg_app/models/engelsburg_api/solar_panel.dart';
 import 'package:engelsburg_app/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -18,59 +19,64 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
         centerTitle: true,
         title: const Text('Daten der Solaranlage'),
       ),
-      body: FutureBuilder<SolarPanel>(
+      body: FutureBuilder<Result>(
         future: ApiService.getSolarSystemData(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final solarPanelData = snapshot.data;
-            final _iconBoxes = [
-              _iconBox(const Icon(Icons.calendar_today, size: 56), 'Datum',
-                  (solarPanelData?.date).toString()),
-              _iconBox(const Icon(Icons.lightbulb_outline, size: 56), 'Energie',
-                  (solarPanelData?.energy).toString()),
-              _iconBox(const Icon(Icons.landscape, size: 56), 'Vermiedenes CO2',
-                  (solarPanelData?.co2Avoidance).toString()),
-              _iconBox(const Icon(Icons.monetization_on, size: 56), 'Vergütung',
-                  (solarPanelData?.payment).toString() + '€'),
-            ];
+            return snapshot.data!.handle<SolarPanel>((json) => SolarPanel.fromJson(json),
+                    (error) {
+                      if (error.isNotFound()) {
+                        return ApiError.errorBox('Solar panel page not found!');
+                      }
+                    },
+                    (solarPanelData) {
+                      final _iconBoxes = [
+                        _iconBox(const Icon(Icons.calendar_today, size: 56), 'Datum',
+                            (solarPanelData.date).toString()),
+                        _iconBox(const Icon(Icons.lightbulb_outline, size: 56), 'Energie',
+                            (solarPanelData.energy).toString()),
+                        _iconBox(const Icon(Icons.landscape, size: 56), 'Vermiedenes CO2',
+                            (solarPanelData.co2Avoidance).toString()),
+                        _iconBox(const Icon(Icons.monetization_on, size: 56), 'Vergütung',
+                            (solarPanelData.payment).toString() + '€'),
+                      ];
 
-            return ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: <Widget>[
-                Card(
-                  margin: EdgeInsets.zero,
-                  child: LayoutBuilder(builder: (context, constraints) {
-                    if (constraints.maxWidth > 400) {
-                      return Padding(
+                      return ListView(
                         padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: _iconBoxes,
-                        ),
+                        children: <Widget>[
+                          Card(
+                            margin: EdgeInsets.zero,
+                            child: LayoutBuilder(builder: (context, constraints) {
+                              if (constraints.maxWidth > 400) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: _iconBoxes,
+                                  ),
+                                );
+                              }
+                              return GridView.count(
+                                padding: const EdgeInsets.all(16.0),
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 4.0,
+                                mainAxisSpacing: 4.0,
+                                children: _iconBoxes,
+                              );
+                            }),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 32.0),
+                            child: HtmlWidget(
+                              (solarPanelData.text).toString(),
+                              textStyle: const TextStyle(height: 1.5, fontSize: 18.0),
+                            ),
+                          )
+                        ],
                       );
-                    }
-                    return GridView.count(
-                      padding: const EdgeInsets.all(16.0),
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 4.0,
-                      mainAxisSpacing: 4.0,
-                      children: _iconBoxes,
-                    );
-                  }),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 32.0),
-                  child: HtmlWidget(
-                    (snapshot.data?.text).toString(),
-                    textStyle: const TextStyle(height: 1.5, fontSize: 18.0),
-                  ),
-                )
-              ],
-            );
-          } else if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
+                    });
           }
           return const Center(child: CircularProgressIndicator());
         },

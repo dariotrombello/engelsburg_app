@@ -1,83 +1,126 @@
 import 'dart:convert';
 
 import 'package:engelsburg_app/constants/api_constants.dart';
-import 'package:engelsburg_app/models/engelsburg_api/articles.dart';
-import 'package:engelsburg_app/models/engelsburg_api/cafeteria.dart';
-import 'package:engelsburg_app/models/engelsburg_api/events.dart';
-import 'package:engelsburg_app/models/engelsburg_api/solar_panel.dart';
+import 'package:engelsburg_app/models/result.dart';
 import 'package:engelsburg_app/services/shared_prefs.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static Future<String> cachedGet(
-      {required Uri uri,
-      String? cacheKey,
-      Map<String, String>? headers}) async {
-    String? body;
+
+  static Future<Result> request({
+    required Uri uri,
+    required HttpMethod method,
+    String? cacheKey,
+    Map<String, String>? headers,
+    Object? body//For all methods except get
+  }) async {
+    Result result;//To return
     try {
-      final res = await http.get(uri, headers: headers);
-      if (!res.statusCode.toString().startsWith('2')) {
-        throw Exception('Interner Server Error!');
-      } else if (res.body.isEmpty) {
-        throw Exception('Empty response!');
+      if (cacheKey != null && SharedPrefs.instance!.containsKey(cacheKey + '_hash')) {
+        headers ??= {};
+        headers['Hash'] =  SharedPrefs.instance!.getString(cacheKey + '_hash')!;
       }
-      body = res.body;
-      if (cacheKey != null) {
-        await SharedPrefs.instance!.setString(cacheKey, body);
+
+      http.Response res;
+      switch (method) {//Execute request
+        case HttpMethod.post:
+          res = await http.post(uri, headers: headers, body: jsonEncode(body));//Post
+          break;
+        case HttpMethod.patch:
+          res = await http.patch(uri, headers: headers, body: jsonEncode(body));//Patch
+          break;
+        case HttpMethod.delete:
+          res = await http.delete(uri, headers: headers, body: jsonEncode(body));//Delete
+          break;
+        default:
+          res = await http.get(uri, headers: headers);//Get
       }
-    } catch (_) {
+
+      if (!res.statusCode.toString().startsWith('2')) {//Check for error
+        result = Result.error(ApiError.tryDecode(res));
+      } else {//Body present or not?
+        result = res.body.isEmpty
+            ? Result.empty()
+            : Result.of(jsonDecode(res.body));
+      }
+
+      if (result.errorPresent()) {//Check for not modified
+        if (cacheKey != null) {
+          String? cached = SharedPrefs.instance!.getString(cacheKey);
+          if (cached != null){
+            result = Result.of(jsonDecode(cached));
+          } else {//Something went horrible wrong!
+            Result.error(ApiError.fromStatus(0));
+            await SharedPrefs.instance!.remove(cacheKey + '_hash');
+          }
+        }
+      }
+
+      if (cacheKey != null && !result.errorPresent()) {//Cache if cacheKey given
+        await SharedPrefs.instance!.setString(cacheKey, res.body);
+        if (res.headers['Hash'] != null) {
+          await SharedPrefs.instance!.setString(cacheKey + "_hash", res.headers['Hash']!);
+        }
+      }
+    } catch (_) {//On IO error or similar, status = 0 represents fetching errors
       if (cacheKey != null) {
-        body = SharedPrefs.instance!.getString(cacheKey);
+        String? cached = SharedPrefs.instance!.getString(cacheKey);
+        result = cached != null
+            ? Result.of(jsonDecode(cached))
+            : Result.error(ApiError.fromStatus(0));
+      } else {
+        result = Result.error(ApiError.fromStatus(0));
       }
     }
-    if (body == null) {
-      throw Exception('Bitte überprüfe deine Internetverbindung!');
-    }
-    return body;
+
+    return result;
   }
 
-  static Future<Articles> getArticles() async {
+  static Future<Result> getArticles() async {
     final uri = Uri.parse(ApiConstants.engelsburgApiArticlesUrl);
-    final body = await cachedGet(
+    return await request(
         uri: uri,
+        method: HttpMethod.get,
         cacheKey: 'articles_json',
-        headers: ApiConstants.unauthenticatedEngelsburgApiHeaders);
-    final json = jsonDecode(body);
-    final articles = Articles.fromJson(json);
-    return articles;
+        headers: ApiConstants.unauthenticatedEngelsburgApiHeaders
+    );
   }
 
-  static Future<Events> getEvents() async {
+  static Future<Result> getEvents() async {
     final uri = Uri.parse(ApiConstants.engelsburgApiEventsUrl);
-    final body = await cachedGet(
+    return await request(
         uri: uri,
+        method: HttpMethod.get,
         cacheKey: 'events_json',
-        headers: ApiConstants.unauthenticatedEngelsburgApiHeaders);
-    final json = jsonDecode(body);
-    final events = Events.fromJson(json);
-    return events;
+        headers: ApiConstants.unauthenticatedEngelsburgApiHeaders
+    );
   }
 
-  static Future<Cafeteria> getCafeteria() async {
+  static Future<Result> getCafeteria() async {
     final uri = Uri.parse(ApiConstants.engelsburgApiCafeteriaUrl);
-    final body = await cachedGet(
+    return await request(
         uri: uri,
+        method: HttpMethod.get,
         cacheKey: 'cafeteria_json',
-        headers: ApiConstants.unauthenticatedEngelsburgApiHeaders);
-    final json = jsonDecode(body);
-    final cafeteria = Cafeteria.fromJson(json);
-    return cafeteria;
+        headers: ApiConstants.unauthenticatedEngelsburgApiHeaders
+    );
   }
 
-  static Future<SolarPanel> getSolarSystemData() async {
+  static Future<Result> getSolarSystemData() async {
     final uri = Uri.parse(ApiConstants.engelsburgApiSolarSystemUrl);
-    final body = await cachedGet(
+    return await request(
         uri: uri,
-        cacheKey: 'solar_panel_json',
-        headers: ApiConstants.unauthenticatedEngelsburgApiHeaders);
-    final json = jsonDecode(body);
-    final solarPanel = SolarPanel.fromJson(json);
-    return solarPanel;
+        method: HttpMethod.get,
+        cacheKey: 'solar_system_json',
+        headers: ApiConstants.unauthenticatedEngelsburgApiHeaders
+    );
   }
 
+}
+
+enum HttpMethod {
+  get,
+  post,
+  patch,
+  delete
 }
