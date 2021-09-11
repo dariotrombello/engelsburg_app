@@ -7,6 +7,7 @@ import 'package:engelsburg_app/utils/html.dart';
 import 'package:engelsburg_app/utils/random_string.dart';
 import 'package:engelsburg_app/utils/time_ago.dart';
 import 'package:flutter/material.dart';
+import 'package:octo_image/octo_image.dart';
 import 'package:share/share.dart';
 
 class NewsPage extends StatefulWidget {
@@ -78,10 +79,17 @@ class _NewsPageState extends State<NewsPage>
                       tag: heroTagFeaturedMedia,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
-                        child: CachedNetworkImage(
-                            height: 200,
-                            fit: BoxFit.cover,
-                            imageUrl: article.mediaUrl as String),
+                        child: OctoImage(
+                          image: CachedNetworkImageProvider(
+                              article.mediaUrl as String),
+                          placeholderBuilder: article.blurHash != null
+                              ? OctoPlaceholder.blurHash(
+                                  article.blurHash as String,
+                                )
+                              : null,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),

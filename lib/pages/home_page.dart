@@ -1,9 +1,12 @@
 import 'package:engelsburg_app/constants/app_constants.dart';
 import 'package:engelsburg_app/pages/about_page.dart';
 import 'package:engelsburg_app/pages/events_page.dart';
+import 'package:engelsburg_app/pages/register_page.dart';
 import 'package:engelsburg_app/pages/settings_page.dart';
 import 'package:engelsburg_app/pages/solar_panel_page.dart';
+import 'package:engelsburg_app/provider/auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -37,6 +40,25 @@ class _HomePageState extends State<HomePage> {
           const DrawerHeader(
             margin: EdgeInsets.zero,
             child: Text(AppConstants.appName),
+          ),
+          Consumer<AuthModel>(
+            builder: (context, auth, child) => auth.isLoggedIn
+                ? Container()
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => const RegisterPage()));
+                            },
+                            child: const Text('Anmelden')),
+                      ),
+                      const Divider(height: 0),
+                    ],
+                  ),
           ),
           ListTile(
             leading: const Icon(Icons.wb_sunny),

@@ -1,7 +1,7 @@
 class ApiConstants {
   static const unauthenticatedEngelsburgApiHeaders = {
     'Content-Type': 'application/json; charset=utf-8',
-    'Accept': 'application/json'
+    'Accept': 'application/json; charset=utf-8'
   };
   static const engelsburgApiBaseUrl = 'https://engelsburg-api.de';
   static const engelsburgApiEventsUrl = engelsburgApiBaseUrl + '/event';
