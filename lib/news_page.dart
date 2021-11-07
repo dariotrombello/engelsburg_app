@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:engelsburg_app/main.dart';
 import 'package:engelsburg_app/utils/time_ago.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
@@ -51,7 +50,6 @@ class NewsPageState extends State<NewsPage> {
           child: InkWell(
             borderRadius: BorderRadius.circular(4.0),
             onTap: () {
-              SharedPrefs.instance.clear();
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (BuildContext context) => NewsDetailPage(
                   post: post,

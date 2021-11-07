@@ -45,7 +45,7 @@ class Post {
   final String status;
   final String type;
   final String link;
-  final Guid title;
+  final Title title;
   final Content content;
   final Content excerpt;
   final int author;
@@ -72,7 +72,7 @@ class Post {
         status: json['status'],
         type: json['type'],
         link: json['link'],
-        title: Guid.fromJson(json['title']),
+        title: Title.fromJson(json['title']),
         content: Content.fromJson(json['content']),
         excerpt: Content.fromJson(json['excerpt']),
         author: json['author'],
@@ -141,33 +141,33 @@ class Content {
 class Embedded {
   Embedded({
     this.author,
-    this.wpTerm,
     this.wpFeaturedmedia,
+    this.wpTerm,
   });
 
   final List<EmbeddedAuthor> author;
-  final List<List<EmbeddedWpTerm>> wpTerm;
   final List<WpFeaturedmedia> wpFeaturedmedia;
+  final List<List<EmbeddedWpTerm>> wpTerm;
 
   factory Embedded.fromJson(Map<String, dynamic> json) => Embedded(
         author: List<EmbeddedAuthor>.from(
             json['author'].map((x) => EmbeddedAuthor.fromJson(x))),
-        wpTerm: List<List<EmbeddedWpTerm>>.from(json['wp:term'].map((x) =>
-            List<EmbeddedWpTerm>.from(
-                x.map((x) => EmbeddedWpTerm.fromJson(x))))),
         wpFeaturedmedia: json['wp:featuredmedia'] == null
             ? null
             : List<WpFeaturedmedia>.from(json['wp:featuredmedia']
                 .map((x) => WpFeaturedmedia.fromJson(x))),
+        wpTerm: List<List<EmbeddedWpTerm>>.from(json['wp:term'].map((x) =>
+            List<EmbeddedWpTerm>.from(
+                x.map((x) => EmbeddedWpTerm.fromJson(x))))),
       );
 
   Map<String, dynamic> toJson() => {
         'author': List<dynamic>.from(author.map((x) => x.toJson())),
-        'wp:term': List<dynamic>.from(
-            wpTerm.map((x) => List<dynamic>.from(x.map((x) => x.toJson())))),
         'wp:featuredmedia': wpFeaturedmedia == null
             ? null
             : List<dynamic>.from(wpFeaturedmedia.map((x) => x.toJson())),
+        'wp:term': List<dynamic>.from(
+            wpTerm.map((x) => List<dynamic>.from(x.map((x) => x.toJson())))),
       };
 }
 
@@ -234,9 +234,9 @@ class WpFeaturedmedia {
   final String slug;
   final String type;
   final String link;
-  final Guid title;
+  final Title title;
   final int author;
-  final Guid caption;
+  final Title caption;
   final String altText;
   final String mediaType;
   final String mimeType;
@@ -251,9 +251,9 @@ class WpFeaturedmedia {
         slug: json['slug'],
         type: json['type'],
         link: json['link'],
-        title: Guid.fromJson(json['title']),
+        title: Title.fromJson(json['title']),
         author: json['author'],
-        caption: Guid.fromJson(json['caption']),
+        caption: Title.fromJson(json['caption']),
         altText: json['alt_text'],
         mediaType: json['media_type'],
         mimeType: json['mime_type'],
@@ -280,14 +280,14 @@ class WpFeaturedmedia {
       };
 }
 
-class Guid {
-  Guid({
+class Title {
+  Title({
     this.rendered,
   });
 
   final String rendered;
 
-  factory Guid.fromJson(Map<String, dynamic> json) => Guid(
+  factory Title.fromJson(Map<String, dynamic> json) => Title(
         rendered: json['rendered'],
       );
 
@@ -511,22 +511,27 @@ class Sizes {
 
   factory Sizes.fromJson(Map<String, dynamic> json) => Sizes(
         medium: CrpThumbnail.fromJson(json['medium']),
-        large: CrpThumbnail.fromJson(json['large']),
+        large:
+            json['large'] == null ? null : CrpThumbnail.fromJson(json['large']),
         thumbnail: CrpThumbnail.fromJson(json['thumbnail']),
-        mediumLarge: CrpThumbnail.fromJson(json['medium_large']),
+        mediumLarge: json['medium_large'] == null
+            ? null
+            : CrpThumbnail.fromJson(json['medium_large']),
         sidebarFeatured: CrpThumbnail.fromJson(json['sidebar-featured']),
-        homePost: CrpThumbnail.fromJson(json['home-post']),
+        homePost: json['home-post'] == null
+            ? null
+            : CrpThumbnail.fromJson(json['home-post']),
         crpThumbnail: CrpThumbnail.fromJson(json['crp_thumbnail']),
         full: CrpThumbnail.fromJson(json['full']),
       );
 
   Map<String, dynamic> toJson() => {
         'medium': medium.toJson(),
-        'large': large.toJson(),
+        'large': large == null ? null : large.toJson(),
         'thumbnail': thumbnail.toJson(),
-        'medium_large': mediumLarge.toJson(),
+        'medium_large': mediumLarge == null ? null : mediumLarge.toJson(),
         'sidebar-featured': sidebarFeatured.toJson(),
-        'home-post': homePost.toJson(),
+        'home-post': homePost == null ? null : homePost.toJson(),
         'crp_thumbnail': crpThumbnail.toJson(),
         'full': full.toJson(),
       };
@@ -658,6 +663,22 @@ class Cury {
       };
 }
 
+class Guid {
+  Guid({
+    this.rendered,
+  });
+
+  final String rendered;
+
+  factory Guid.fromJson(Map<String, dynamic> json) => Guid(
+        rendered: json['rendered'],
+      );
+
+  Map<String, dynamic> toJson() => {
+        'rendered': rendered,
+      };
+}
+
 class PostLinks {
   PostLinks({
     this.self,
@@ -666,10 +687,10 @@ class PostLinks {
     this.author,
     this.replies,
     this.versionHistory,
+    this.wpFeaturedmedia,
     this.wpAttachment,
     this.wpTerm,
     this.curies,
-    this.wpFeaturedmedia,
   });
 
   final List<About> self;
@@ -678,10 +699,10 @@ class PostLinks {
   final List<ReplyElement> author;
   final List<ReplyElement> replies;
   final List<VersionHistory> versionHistory;
+  final List<ReplyElement> wpFeaturedmedia;
   final List<About> wpAttachment;
   final List<LinksWpTerm> wpTerm;
   final List<Cury> curies;
-  final List<ReplyElement> wpFeaturedmedia;
 
   factory PostLinks.fromJson(Map<String, dynamic> json) => PostLinks(
         self: List<About>.from(json['self'].map((x) => About.fromJson(x))),
@@ -694,15 +715,15 @@ class PostLinks {
             json['replies'].map((x) => ReplyElement.fromJson(x))),
         versionHistory: List<VersionHistory>.from(
             json['version-history'].map((x) => VersionHistory.fromJson(x))),
+        wpFeaturedmedia: json['wp:featuredmedia'] == null
+            ? null
+            : List<ReplyElement>.from(
+                json['wp:featuredmedia'].map((x) => ReplyElement.fromJson(x))),
         wpAttachment: List<About>.from(
             json['wp:attachment'].map((x) => About.fromJson(x))),
         wpTerm: List<LinksWpTerm>.from(
             json['wp:term'].map((x) => LinksWpTerm.fromJson(x))),
         curies: List<Cury>.from(json['curies'].map((x) => Cury.fromJson(x))),
-        wpFeaturedmedia: json['wp:featuredmedia'] == null
-            ? null
-            : List<ReplyElement>.from(
-                json['wp:featuredmedia'].map((x) => ReplyElement.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -713,13 +734,13 @@ class PostLinks {
         'replies': List<dynamic>.from(replies.map((x) => x.toJson())),
         'version-history':
             List<dynamic>.from(versionHistory.map((x) => x.toJson())),
+        'wp:featuredmedia': wpFeaturedmedia == null
+            ? null
+            : List<dynamic>.from(wpFeaturedmedia.map((x) => x.toJson())),
         'wp:attachment':
             List<dynamic>.from(wpAttachment.map((x) => x.toJson())),
         'wp:term': List<dynamic>.from(wpTerm.map((x) => x.toJson())),
         'curies': List<dynamic>.from(curies.map((x) => x.toJson())),
-        'wp:featuredmedia': wpFeaturedmedia == null
-            ? null
-            : List<dynamic>.from(wpFeaturedmedia.map((x) => x.toJson())),
       };
 }
 
