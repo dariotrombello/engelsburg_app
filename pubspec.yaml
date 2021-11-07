@@ -11,25 +11,24 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  cached_network_image: ^3.0.0
-  device_info: ^2.0.0
-  flutter_widget_from_html_core: ^0.6.1
-  google_maps_flutter: ^2.0.3
+  cached_network_image: ^3.1.0+1
+  flutter_widget_from_html_core: ^0.8.1
+  google_maps_flutter: ^2.1.0
   html: ^0.15.0
   html_unescape: ^2.0.0
-  http: ^0.13.3
+  http: ^0.13.4
   intl: ^0.17.0
-  native_pdf_view: ^4.0.1
-  package_info: ^2.0.0
-  share: ^2.0.1
-  shared_preferences: ^2.0.5
-  url_launcher: ^6.0.3
-  weather_icons: ^3.0.0-nullsafety.0
+  native_pdf_view: ^5.0.0
+  package_info_plus: ^1.3.0
+  share_plus: ^3.0.4
+  shared_preferences: ^2.0.8
+  url_launcher: ^6.0.12
+  weather_icons: ^3.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  pedantic: ^1.11.0
+  pedantic: ^1.11.1
 
 flutter:
   uses-material-design: true
