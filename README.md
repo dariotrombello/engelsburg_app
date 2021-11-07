@@ -33,7 +33,7 @@ ACHTUNG: Veröffentliche beide Dateien unter keinen Umständen! Wenn du einen Pu
 
 ## License
 
-Copyright 2018-2020 Dario Trombello
+Copyright 2018-2021 Dario Trombello
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
