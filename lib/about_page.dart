@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'about_school_page.dart';
 
 class AboutPage extends StatefulWidget {
+  const AboutPage({Key key}) : super(key: key);
+
   @override
   _AboutPageState createState() => _AboutPageState();
 }
@@ -43,7 +45,7 @@ class _AboutPageState extends State<AboutPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Über'),
+        title: const Text('Über'),
       ),
       body: ListView(
         children: <Widget>[
@@ -61,10 +63,10 @@ class _AboutPageState extends State<AboutPage> {
               appDescription.toString(),
             ),
           ),
-          Divider(),
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.star_half),
-            title: Text(
+            leading: const Icon(Icons.star_half),
+            title: const Text(
               'App bewerten',
             ),
             onTap: () => url_launcher.launch(Platform.isIOS
@@ -72,30 +74,30 @@ class _AboutPageState extends State<AboutPage> {
                 : 'https://play.google.com/store/apps/details?id=de.dariotrombello.engelsburg_app'),
           ),
           ListTile(
-            leading: Icon(Icons.code),
-            title: Text(
+            leading: const Icon(Icons.code),
+            title: const Text(
               'Quellcode auf GitHub',
             ),
             onTap: () => url_launcher
                 .launch('https://github.com/dariotrombello/engelsburg_app'),
           ),
           ListTile(
-            leading: Icon(Icons.open_in_new),
-            title: Text(
+            leading: const Icon(Icons.open_in_new),
+            title: const Text(
               'Besuche meine Webseite',
             ),
             onTap: () => url_launcher.launch('https://www.dariotrombello.com'),
           ),
           ListTile(
-            leading: Icon(Icons.mail),
-            title: Text(
+            leading: const Icon(Icons.mail),
+            title: const Text(
               'Schreibe mir eine E-Mail',
             ),
             onTap: () => url_launcher.launch('mailto:info@dariotrombello.com'),
           ),
           ListTile(
-            leading: Icon(Icons.info),
-            title: Text(
+            leading: const Icon(Icons.info),
+            title: const Text(
               'Open-Source-Lizenzen',
             ),
             onTap: () => showLicensePage(
@@ -110,14 +112,14 @@ class _AboutPageState extends State<AboutPage> {
                 applicationVersion: _packageInfo.version.toString(),
                 context: context),
           ),
-          Divider(),
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.school),
-            title: Text(
+            leading: const Icon(Icons.school),
+            title: const Text(
               'Über die Schule',
             ),
             onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (context) => AboutSchoolPage())),
+                MaterialPageRoute(builder: (context) => const AboutSchoolPage())),
           ),
         ],
       ),

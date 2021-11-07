@@ -5,6 +5,8 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 
 class SolarPanelPage extends StatefulWidget {
+  const SolarPanelPage({Key key}) : super(key: key);
+
   @override
   _SolarPanelPageState createState() => _SolarPanelPageState();
 }
@@ -60,18 +62,18 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Daten der Solaranlage'),
+        title: const Text('Daten der Solaranlage'),
       ),
       body: FutureBuilder(
         future: _getSolarPanelData(),
         builder: (context, snapshot) {
           final _iconBoxes = [
-            _iconBox(Icon(Icons.calendar_today, size: 56), 'Datum', _solarDate),
-            _iconBox(Icon(Icons.lightbulb_outline, size: 56), 'Energie',
+            _iconBox(const Icon(Icons.calendar_today, size: 56), 'Datum', _solarDate),
+            _iconBox(const Icon(Icons.lightbulb_outline, size: 56), 'Energie',
                 _solarEnergy),
-            _iconBox(Icon(Icons.landscape, size: 56), 'Vermiedenes CO2',
+            _iconBox(const Icon(Icons.landscape, size: 56), 'Vermiedenes CO2',
                 _solarAvoidedCarbonDioxide),
-            _iconBox(Icon(Icons.monetization_on, size: 56), 'Vergütung',
+            _iconBox(const Icon(Icons.monetization_on, size: 56), 'Vergütung',
                 _solarRevenue + '€'),
           ];
           if (snapshot.hasData) {
@@ -94,7 +96,7 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
                       }
                       return GridView.count(
                         padding: const EdgeInsets.all(16.0),
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         crossAxisCount: 2,
                         crossAxisSpacing: 4.0,
@@ -107,7 +109,7 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
                     padding: const EdgeInsets.only(top: 32.0),
                     child: Text(
                       snapshot.data.join('\n\n'),
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 15.0,
                           height: 1.5,
                           fontFamily: 'Roboto Slab'),
@@ -117,9 +119,9 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
               ),
             );
           } else if (snapshot.hasError) {
-            return ErrorCard();
+            return const ErrorCard();
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -132,7 +134,7 @@ class _SolarPanelPageState extends State<SolarPanelPage> {
       children: <Widget>[
         icon,
         Text(title),
-        Padding(padding: const EdgeInsets.only(top: 8.0)),
+        const Padding(padding: EdgeInsets.only(top: 8.0)),
         Text(description)
       ],
     );

@@ -5,6 +5,8 @@ import 'package:html_unescape/html_unescape.dart';
 import 'package:http/http.dart' as http;
 
 class CafeteriaPage extends StatefulWidget {
+  const CafeteriaPage({Key key}) : super(key: key);
+
   @override
   _CafeteriaPageState createState() => _CafeteriaPageState();
 }
@@ -39,13 +41,13 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
           return RefreshIndicator(
             onRefresh: () async => setState(() {}),
             child: ListView(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               children: <Widget>[
                 Padding(
-                    padding: EdgeInsets.only(bottom: 16.0),
+                    padding: const EdgeInsets.only(bottom: 16.0),
                     child: Center(
                         child: Text(snapshot.data[0].toString(),
-                            style: TextStyle(fontWeight: FontWeight.w700)))),
+                            style: const TextStyle(fontWeight: FontWeight.w700)))),
                 ...snapshot.data.sublist(1).map((cafeteriaItem) {
                   // Erstes Element in der Liste überspringen,
                   // da das bereits angezeigt wird und join() verwenden,
@@ -53,7 +55,7 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
                   return Card(
                     margin: EdgeInsets.zero,
                     child: Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Text(
                         cafeteriaItem.toString(),
                       ),
@@ -64,7 +66,7 @@ class _CafeteriaPageState extends State<CafeteriaPage> {
             ),
           );
         }
-        return Center(child: CircularProgressIndicator());
+        return const Center(child: CircularProgressIndicator());
       },
     );
   }

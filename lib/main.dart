@@ -23,13 +23,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPrefs.init();
   runApp(MaterialApp(
-    localizationsDelegates: [
+    localizationsDelegates: const [
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ],
-    supportedLocales: [Locale('de')],
-    home: EngelsburgApp(),
+    supportedLocales: const [Locale('de')],
+    home: const EngelsburgApp(),
     theme: ThemeData.light().copyWith(
       visualDensity: VisualDensity.adaptivePlatformDensity,
     ),
@@ -40,6 +40,8 @@ void main() async {
 }
 
 class EngelsburgApp extends StatefulWidget {
+  const EngelsburgApp({Key key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _EngelsburgAppState();
 }
@@ -52,7 +54,7 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: [
+        children: const [
           NewsPage(),
           CafeteriaPage(),
           SchoolNewspaperPage(),
@@ -72,44 +74,44 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
                         'assets/images/applogo.png',
                         height: 72,
                       )),
-                  Align(
+                  const Align(
                       alignment: Alignment.bottomLeft,
                       child: Text('Engelsburg-App'))
                 ]),
               ),
             ),
             ListTile(
-              leading: Icon(Icons.wb_sunny),
-              title: Text(
+              leading: const Icon(Icons.wb_sunny),
+              title: const Text(
                 'Daten der Solaranlage',
               ),
               onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => SolarPanelPage())),
+                  MaterialPageRoute(builder: (context) => const SolarPanelPage())),
             ),
             ListTile(
-              leading: Icon(Icons.watch_later),
-              title: Text(
+              leading: const Icon(Icons.watch_later),
+              title: const Text(
                 'Termine',
               ),
               onTap: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => EventsPage())),
+                  .push(MaterialPageRoute(builder: (context) => const EventsPage())),
             ),
             ListTile(
-              leading: Icon(Icons.cloud),
-              title: Text(
+              leading: const Icon(Icons.cloud),
+              title: const Text(
                 'Wetter',
               ),
               onTap: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => WeatherPage())),
+                  .push(MaterialPageRoute(builder: (context) => const WeatherPage())),
             ),
-            Divider(),
+            const Divider(),
             ListTile(
-              leading: Icon(Icons.settings),
-              title: Text(
+              leading: const Icon(Icons.settings),
+              title: const Text(
                 'Einstellungen',
               ),
               onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => SettingsPage())),
+                  MaterialPageRoute(builder: (context) => const SettingsPage())),
             ),
           ],
         ),
@@ -118,12 +120,12 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
         actions: [
           IconButton(
               tooltip: 'Über',
-              icon: Icon(Icons.info_outline),
+              icon: const Icon(Icons.info_outline),
               onPressed: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => AboutPage())))
+                  .push(MaterialPageRoute(builder: (context) => const AboutPage())))
         ],
         centerTitle: true,
-        title: Text('Engelsburg-App'),
+        title: const Text('Engelsburg-App'),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -132,7 +134,7 @@ class _EngelsburgAppState extends State<EngelsburgApp> {
             Theme.of(context).buttonTheme.colorScheme.secondaryVariant,
         unselectedItemColor:
             Theme.of(context).buttonTheme.colorScheme.secondary,
-        items: [
+        items: const [
           BottomNavigationBarItem(
               activeIcon: Icon(Icons.library_books),
               icon: Icon(Icons.library_books),

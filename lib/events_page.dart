@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'error_card.dart';
 
 class EventsPage extends StatefulWidget {
+  const EventsPage({Key key}) : super(key: key);
+
   @override
   _EventsPageState createState() => _EventsPageState();
 }
@@ -32,7 +34,7 @@ class _EventsPageState extends State<EventsPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Termine'),
+        title: const Text('Termine'),
       ),
       body: FutureBuilder(
         future: _getEvents(),
@@ -41,7 +43,7 @@ class _EventsPageState extends State<EventsPage> {
             return RefreshIndicator(
               onRefresh: () async => setState(() {}),
               child: ListView.separated(
-                separatorBuilder: (context, index) => Divider(height: 0),
+                separatorBuilder: (context, index) => const Divider(height: 0),
                 itemCount: snapshot.data.length,
                 itemBuilder: (context, index) {
                   return ListTile(
@@ -56,17 +58,17 @@ class _EventsPageState extends State<EventsPage> {
           } else if (snapshot.hasData && snapshot.data.isEmpty) {
             return Card(
               child: Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+                  children: const [
                     Icon(
                       Icons.watch_later,
                       size: 64.0,
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
+                      padding: EdgeInsets.only(top: 16.0),
                       child: Text(
                         'Aktuell keine Termine',
                         textAlign: TextAlign.center,
@@ -78,9 +80,9 @@ class _EventsPageState extends State<EventsPage> {
               ),
             );
           } else if (snapshot.hasError) {
-            return ErrorCard();
+            return const ErrorCard();
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );

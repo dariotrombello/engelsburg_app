@@ -9,6 +9,8 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class SubstitutionPlanPage extends StatefulWidget {
+  const SubstitutionPlanPage({Key key}) : super(key: key);
+
   @override
   SubstitutionPlanPageState createState() => SubstitutionPlanPageState();
 }
@@ -68,9 +70,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
     _teacherSelected = _prefs.getBool('teacherSelected') ?? false;
     _substitutionFilter = _prefs.getString('substitutionFilter');
 
-    if (_substitutionFilter == null) {
-      await _prefs.setString('substitutionFilter', 'Alle Klassen anzeigen');
-    }
+    _substitutionFilter ??= 'Alle Klassen anzeigen';
   }
 
   Future _setSubstitutionFilter() async {
@@ -83,7 +83,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
     _newsDays.clear();
     var untisWeeks = <String>[];
     final navbarUrl = Uri.parse(
-        'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/frames/navbar.htm');
+        'https://engelsburg.smmp.de/vertretungsplaene/eng/Stp_Upload/frames/navbar.htm');
     final navbarRes = await http.get(navbarUrl);
     final navbarDocument = parse(navbarRes.body);
     final navbarWeeks = weekday >= 5 || weekday == 1
@@ -95,7 +95,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
     for (var i = 0; i < navbarWeeks.length; i++) {
       untisWeeks.add(navbarWeeks[i].attributes['value']);
       final substitutionTableUrl = Uri.parse(
-          'https://engelsburg.smmp.de/vertretungsplaene/ebg/Stp_Upload/' +
+          'https://engelsburg.smmp.de/vertretungsplaene/eng/Stp_Upload/' +
               untisWeeks[i] +
               '/w/w00000.htm');
       final substitutionTableRes = await http.get(substitutionTableUrl);
@@ -129,7 +129,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
         .trim()
         .replaceFirst('var classes = [', '')
         .replaceFirst('];', '')
-        .replaceAll('\"', '')
+        .replaceAll('"', '')
         .split(',');
     _allClasses.insert(0, 'Alle Klassen anzeigen');
     await _prefs.setStringList('allClasses', _allClasses);
@@ -143,7 +143,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
 
   void _goToNextPage() {
     _pageController.nextPage(
-        duration: Duration(milliseconds: 350), curve: Curves.easeOutSine);
+        duration: const Duration(milliseconds: 350), curve: Curves.easeOutSine);
   }
 
   @override
@@ -155,26 +155,26 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done && !_isLoggedIn) {
           return PageView(
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             controller: _pageController,
             children: [
               // welcome page
               Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: () => _goToNextPage(),
-                  child: Icon(Icons.arrow_forward),
+                  child: const Icon(Icons.arrow_forward),
                 ),
                 body: ListView(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   children: <Widget>[
                     Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Image.asset(
                         'assets/images/applogo.png',
                         height: 128.0,
                       ),
                     ),
-                    Text(
+                    const Text(
                       'Willkommen beim Vertretungsplan\n',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -191,13 +191,13 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                         children: <TextSpan>[
                           TextSpan(
                               text: 'info@dariotrombello.com',
-                              style: TextStyle(color: Colors.blue),
+                              style: const TextStyle(color: Colors.blue),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   url_launcher
                                       .launch('mailto:info@dariotrombello.com');
                                 }),
-                          TextSpan(text: '.')
+                          const TextSpan(text: '.')
                         ],
                       ),
                     ),
@@ -206,7 +206,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
               ),
               // select whether teacher or student
               Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: <Widget>[
                     Expanded(
@@ -224,7 +224,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
+                            children: const <Widget>[
                               Icon(
                                 Icons.person,
                                 size: 32.0,
@@ -254,7 +254,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
+                            children: const <Widget>[
                               Icon(
                                 Icons.school,
                                 size: 32.0,
@@ -275,9 +275,9 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
               // enter credentials
               Center(
                 child: Card(
-                  margin: EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.all(16.0),
                   child: Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -308,7 +308,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                 hintText: 'Passwort eingeben',
                                 border: const OutlineInputBorder()),
                           ),
-                          Padding(padding: EdgeInsets.only(top: 16.0)),
+                          const Padding(padding: EdgeInsets.only(top: 16.0)),
                           _teacherSelected
                               ? SizedBox(
                                   width: 150,
@@ -327,9 +327,9 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                   ),
                                 )
                               : Container(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 8.0),
-                                  decoration: ShapeDecoration(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  decoration: const ShapeDecoration(
                                       shape: RoundedRectangleBorder(
                                           side: BorderSide(
                                               width: 1.0, color: Colors.grey),
@@ -363,8 +363,8 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                     ),
                                   ),
                                 ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 32.0),
+                          const Padding(
+                            padding: EdgeInsets.only(top: 32.0),
                           ),
                           SizedBox(
                             height: 60,
@@ -380,7 +380,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                           })));
                                 }
                               },
-                              child: Text('Anmelden'),
+                              child: const Text('Anmelden'),
                             ),
                           ),
                         ],
@@ -399,7 +399,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
               // TEMP: Umgehung eines Bugs, der im hellen Modus der App auftritt
               labelColor: Theme.of(context).textTheme.bodyText1.color,
               controller: _tabController,
-              tabs: <Widget>[
+              tabs: const <Widget>[
                 Tab(
                   child: Text('Vertretungsplan'),
                 ),
@@ -491,9 +491,9 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                           _noSubstitutionsAvailable
                               ? SizedBox(
                                   width: width,
-                                  child: Card(
+                                  child: const Card(
                                     child: Padding(
-                                      padding: const EdgeInsets.all(18.0),
+                                      padding: EdgeInsets.all(18.0),
                                       child: Center(
                                         child: Text(
                                           'Keine Vertretungen für diesen Tag',
@@ -505,7 +505,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                 )
                               : ListView.builder(
                                   shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
+                                  physics: const NeverScrollableScrollPhysics(),
                                   itemCount: _classes.length,
                                   itemBuilder: (context, index2) {
                                     var _hideElement = false;
@@ -585,7 +585,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                                       leading: Text(
                                                         _hours[index2]
                                                             .toString(),
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             fontSize: 28.0,
                                                             color:
                                                                 Colors.white),
@@ -594,7 +594,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                                         _substitutionTypes[
                                                                 index2]
                                                             .toString(),
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             color:
                                                                 Colors.white),
                                                       ),
@@ -602,7 +602,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                                         children: <Widget>[
                                                           RichText(
                                                             text: TextSpan(
-                                                              style: TextStyle(
+                                                              style: const TextStyle(
                                                                   color: Colors
                                                                       .white70),
                                                               text: _classes[
@@ -652,7 +652,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                                                         : _teachers[
                                                                             index2],
                                                                     style:
-                                                                        TextStyle(
+                                                                        const TextStyle(
                                                                       decoration:
                                                                           TextDecoration
                                                                               .lineThrough,
@@ -724,7 +724,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 _dayList[index].toString(),
-                                style: TextStyle(fontSize: 20),
+                                style: const TextStyle(fontSize: 20),
                               ),
                             ),
                           ),
@@ -740,7 +740,7 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
                                       padding: const EdgeInsets.all(16.0),
                                       child: Text(
                                         newsDay.text.toString(),
-                                        style: TextStyle(fontSize: 16.0),
+                                        style: const TextStyle(fontSize: 16.0),
                                       ),
                                     ),
                                   ),
@@ -767,9 +767,9 @@ class SubstitutionPlanPageState extends State<SubstitutionPlanPage>
             ),
           );
         } else if (snapshot.hasError) {
-          return ErrorCard();
+          return const ErrorCard();
         }
-        return Center(child: CircularProgressIndicator());
+        return const Center(child: CircularProgressIndicator());
       },
     );
   }

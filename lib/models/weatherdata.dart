@@ -104,8 +104,8 @@ class Current {
         weather:
             List<Weather>.from(json['weather'].map((x) => Weather.fromJson(x))),
         windGust:
-            json['wind_gust'] == null ? null : json['wind_gust'].toDouble(),
-        pop: json['pop'] == null ? null : json['pop'].toDouble(),
+            json['wind_gust']?.toDouble(),
+        pop: json['pop']?.toDouble(),
         rain: json['rain'] == null ? null : The1H.fromJson(json['rain']),
         snow: json['snow'] == null ? null : The1H.fromJson(json['snow']),
       );
@@ -127,8 +127,8 @@ class Current {
         'weather': List<dynamic>.from(weather.map((x) => x.toJson())),
         'wind_gust': windGust,
         'pop': pop,
-        'rain': rain == null ? null : rain.toJson(),
-        'snow': snow == null ? null : snow.toJson(),
+        'rain': rain?.toJson(),
+        'snow': snow?.toJson(),
       };
 }
 
@@ -140,7 +140,7 @@ class The1H {
   final double the1H;
 
   factory The1H.fromJson(Map<String, dynamic> json) => The1H(
-        the1H: json['1h'] == null ? null : json['1h'].toDouble(),
+        the1H: json['1h']?.toDouble(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -236,13 +236,13 @@ class Daily {
         windSpeed: json['wind_speed'].toDouble(),
         windDeg: json['wind_deg'],
         windGust:
-            json['wind_gust'] == null ? null : json['wind_gust'].toDouble(),
+            json['wind_gust']?.toDouble(),
         weather:
             List<Weather>.from(json['weather'].map((x) => Weather.fromJson(x))),
         clouds: json['clouds'],
         pop: json['pop'].toDouble(),
-        rain: json['rain'] == null ? null : json['rain'].toDouble(),
-        snow: json['snow'] == null ? null : json['snow'].toDouble(),
+        rain: json['rain']?.toDouble(),
+        snow: json['snow']?.toDouble(),
         uvi: json['uvi'].toDouble(),
       );
 

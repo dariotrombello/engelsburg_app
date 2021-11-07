@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'main.dart';
 
 class SettingsPage extends StatefulWidget {
+  const SettingsPage({Key key}) : super(key: key);
+
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
@@ -36,7 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
           .trim()
           .replaceFirst('var classes = [', '')
           .replaceFirst('];', '')
-          .replaceAll('\"', '')
+          .replaceAll('"', '')
           .split(',');
       _allClasses.insert(0, 'Alle Klassen anzeigen');
       await _prefs.setStringList('allClasses', _allClasses);
@@ -51,7 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Einstellungen'),
+        title: const Text('Einstellungen'),
       ),
       body: FutureBuilder(
         future: _getSettings,
@@ -63,9 +65,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 _selected != 'Alle Klassen anzeigen' && _selected != null;
 
             return ListView(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               children: <Widget>[
-                Text('Vertretungsplan'),
+                const Text('Vertretungsplan'),
                 RadioListTile(
                     title: const Text('Alle Klassen anzeigen'),
                     value: 'Alle Klassen anzeigen',
@@ -103,8 +105,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     _allClasses.sublist(1).contains(_selected))
                   Center(
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      decoration: ShapeDecoration(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      decoration: const ShapeDecoration(
                           shape: RoundedRectangleBorder(
                               side: BorderSide(width: 1.0, color: Colors.grey),
                               borderRadius:
@@ -130,7 +132,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 if (_isFiltered && _teacherSelected)
                   TextField(
                     controller: _textEditingController,
-                    decoration: InputDecoration(border: OutlineInputBorder()),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
                     onChanged: (value) {
                       _prefs.setString('substitutionFilter', value);
                       setState(() => _substitutionSettingsChanged = true);
@@ -138,12 +140,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 if (_substitutionSettingsChanged)
                   Padding(
-                    padding: EdgeInsets.only(top: 16.0),
+                    padding: const EdgeInsets.only(top: 16.0),
                     child: Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Row(
-                          children: <Widget>[
+                          children: const <Widget>[
                             Padding(
                               padding: EdgeInsets.only(right: 16.0),
                               child: Icon(

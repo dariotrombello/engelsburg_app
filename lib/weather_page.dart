@@ -14,6 +14,8 @@ import 'package:weather_icons/src/util/rotate.dart';
 import 'models/weatherdata.dart';
 
 class WeatherPage extends StatefulWidget {
+  const WeatherPage({Key key}) : super(key: key);
+
   @override
   _WeatherPageState createState() => _WeatherPageState();
 }
@@ -21,7 +23,7 @@ class WeatherPage extends StatefulWidget {
 class _WeatherPageState extends State<WeatherPage> {
   Future<OpenWeatherMap> _loadWeather() async {
     // openweathermap api key
-    final apiKey = '<API_KEY>';
+    const apiKey = '<API_KEY>';
     final url = Uri.parse(
         'https://api.openweathermap.org/data/2.5/onecall?lat=51.315229&lon=9.48816&appid=$apiKey&lang=de&units=metric&exclude=alerts,minutely');
     final res = await http.get(url);
@@ -58,7 +60,7 @@ class _WeatherPageState extends State<WeatherPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Wetter'),
+        title: const Text('Wetter'),
       ),
       body: FutureBuilder<OpenWeatherMap>(
         future: _loadWeather(),
@@ -87,7 +89,7 @@ class _WeatherPageState extends State<WeatherPage> {
                             Text(
                               snapshot.data.current.temp.round().toString() +
                                   '°',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 72.0,
                                 color: Colors.white,
                                 shadows: [
@@ -104,7 +106,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                       .data.current.weather.first.description
                                       .toString(),
                               textAlign: TextAlign.left,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 height: 1.5,
                                 fontSize: 16.0,
@@ -122,11 +124,11 @@ class _WeatherPageState extends State<WeatherPage> {
                     ],
                   ),
                   Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        Text(
+                        const Text(
                           'Einzelheiten',
                           textAlign: TextAlign.left,
                           style: TextStyle(
@@ -138,7 +140,7 @@ class _WeatherPageState extends State<WeatherPage> {
                               color: Theme.of(context).textTheme.caption.color),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(top: 24.0),
+                          padding: const EdgeInsets.only(top: 24.0),
                           child: Row(
                             children: <Widget>[
                               Expanded(
@@ -148,36 +150,36 @@ class _WeatherPageState extends State<WeatherPage> {
                                     children: <Widget>[
                                       _currentWeatherTile(
                                           leading:
-                                              Icon(WeatherIcons.thermometer),
+                                              const Icon(WeatherIcons.thermometer),
                                           title: 'Gefühlte Temperatur',
                                           subtitle: snapshot
                                                   .data.current.feelsLike
                                                   .round()
                                                   .toString() +
                                               ' ℃'),
-                                      Padding(
+                                      const Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
                                       _currentWeatherTile(
-                                          leading: Icon(WeatherIcons.humidity),
+                                          leading: const Icon(WeatherIcons.humidity),
                                           title: 'Luftfeuchtigkeit',
                                           subtitle: snapshot
                                                   .data.current.humidity
                                                   .toString() +
                                               ' %'),
-                                      Padding(
+                                      const Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
                                       _currentWeatherTile(
-                                          leading: Icon(WeatherIcons.barometer),
+                                          leading: const Icon(WeatherIcons.barometer),
                                           title: 'Luftdruck',
                                           subtitle: snapshot
                                                   .data.current.pressure
                                                   .round()
                                                   .toString() +
                                               ' hPa'),
-                                      Padding(
+                                      const Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
                                       _currentWeatherTile(
-                                          leading: Icon(WeatherIcons.umbrella),
+                                          leading: const Icon(WeatherIcons.umbrella),
                                           title: 'UV-Index',
                                           subtitle: snapshot.data.current.uvi
                                               .round()
@@ -196,7 +198,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                             degree: snapshot
                                                 .data.current.windDeg
                                                 .toDouble(),
-                                            child: Icon(WeatherIcons.wind),
+                                            child: const Icon(WeatherIcons.wind),
                                           ),
                                           title: 'Windgeschwindigkeit',
                                           subtitle:
@@ -205,10 +207,10 @@ class _WeatherPageState extends State<WeatherPage> {
                                                       .round()
                                                       .toString() +
                                                   ' km/h'),
-                                      Padding(
+                                      const Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
                                       _currentWeatherTile(
-                                          leading: Icon(WeatherIcons
+                                          leading: const Icon(WeatherIcons
                                               .thermometer_exterior),
                                           title: 'Taupunkt',
                                           subtitle: (snapshot
@@ -216,18 +218,18 @@ class _WeatherPageState extends State<WeatherPage> {
                                                       .round())
                                                   .toString() +
                                               ' ℃'),
-                                      Padding(
+                                      const Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
                                       _currentWeatherTile(
-                                          leading: Icon(WeatherIcons.cloud),
+                                          leading: const Icon(WeatherIcons.cloud),
                                           title: 'Bewölkung',
                                           subtitle: snapshot.data.current.clouds
                                                   .toString() +
                                               ' %'),
-                                      Padding(
+                                      const Padding(
                                           padding: EdgeInsets.only(top: 24.0)),
                                       _currentWeatherTile(
-                                          leading: Icon(WeatherIcons.fog),
+                                          leading: const Icon(WeatherIcons.fog),
                                           title: 'Sichtweite',
                                           subtitle: (snapshot.data.current
                                                           .visibility /
@@ -242,8 +244,8 @@ class _WeatherPageState extends State<WeatherPage> {
                             ],
                           ),
                         ),
-                        Padding(padding: EdgeInsets.only(top: 32.0)),
-                        Text(
+                        const Padding(padding: EdgeInsets.only(top: 32.0)),
+                        const Text(
                           'Wettervorhersage',
                           textAlign: TextAlign.left,
                           style: TextStyle(
@@ -254,7 +256,7 @@ class _WeatherPageState extends State<WeatherPage> {
                           style: TextStyle(
                               color: Theme.of(context).textTheme.caption.color),
                         ),
-                        Padding(
+                        const Padding(
                           padding: EdgeInsets.only(top: 24.0),
                         ),
                         SingleChildScrollView(
@@ -271,7 +273,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                 children: <Widget>[
                                   Padding(
                                     padding:
-                                        EdgeInsets.symmetric(horizontal: 16.0),
+                                        const EdgeInsets.symmetric(horizontal: 16.0),
                                     child: Column(
                                       children: <Widget>[
                                         Text(hourly.temp.round().toString() +
@@ -283,9 +285,9 @@ class _WeatherPageState extends State<WeatherPage> {
                                           placeholder: (context, url) =>
                                               Container(),
                                           errorWidget: (context, url, error) =>
-                                              Icon(Icons.error),
+                                              const Icon(Icons.error),
                                         ),
-                                        Padding(
+                                        const Padding(
                                           padding: EdgeInsets.only(top: 16.0),
                                         ),
                                         Text(hour.toString()),
@@ -297,10 +299,10 @@ class _WeatherPageState extends State<WeatherPage> {
                             }).toList(),
                           ),
                         ),
-                        Padding(
+                        const Padding(
                           padding: EdgeInsets.only(top: 24.0),
                         ),
-                        Text(
+                        const Text(
                           'Wettervorhersage',
                           textAlign: TextAlign.left,
                           style: TextStyle(
@@ -311,7 +313,7 @@ class _WeatherPageState extends State<WeatherPage> {
                           style: TextStyle(
                               color: Theme.of(context).textTheme.caption.color),
                         ),
-                        Padding(padding: EdgeInsets.only(top: 16.0)),
+                        const Padding(padding: EdgeInsets.only(top: 16.0)),
                         ...snapshot.data.daily.map(
                           (daily) {
                             final iconUrl =
@@ -319,11 +321,10 @@ class _WeatherPageState extends State<WeatherPage> {
 
                             return Theme(
                               data: Theme.of(context).copyWith(
-                                  accentColor: Theme.of(context)
+                                  dividerColor: Colors.transparent, colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Theme.of(context)
                                       .textTheme
                                       .bodyText1
-                                      .color,
-                                  dividerColor: Colors.transparent),
+                                      .color)),
                               child: ExpansionTile(
                                 leading: CachedNetworkImage(
                                   height: 48.0,
@@ -331,7 +332,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                   imageUrl: iconUrl,
                                   placeholder: (context, url) => Container(),
                                   errorWidget: (context, url, error) =>
-                                      Icon(Icons.error),
+                                      const Icon(Icons.error),
                                 ),
                                 title: Text(_localizedWeekday(
                                     DateTime.fromMillisecondsSinceEpoch(
@@ -344,7 +345,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                         ' ℃'),
                                 children: <Widget>[
                                   Container(
-                                    padding: EdgeInsets.only(
+                                    padding: const EdgeInsets.only(
                                         bottom: 16.0, left: 4.0, top: 8.0),
                                     alignment: Alignment.centerLeft,
                                     child: Text(
@@ -361,13 +362,13 @@ class _WeatherPageState extends State<WeatherPage> {
                                           children: <Widget>[
                                             _dailyWeatherCard(
                                                 leading:
-                                                    Icon(WeatherIcons.umbrella),
+                                                    const Icon(WeatherIcons.umbrella),
                                                 title: 'UV-Index',
                                                 description: daily.uvi
                                                     .round()
                                                     .toString()),
                                             _dailyWeatherCard(
-                                              leading: Icon(WeatherIcons.rain),
+                                              leading: const Icon(WeatherIcons.rain),
                                               title:
                                                   'Niederschlagswahrscheinlichkeit',
                                               description: (daily.pop * 100)
@@ -380,7 +381,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                   degree:
                                                       daily.windDeg.toDouble(),
                                                   child:
-                                                      Icon(WeatherIcons.wind),
+                                                      const Icon(WeatherIcons.wind),
                                                 ),
                                                 title: 'Windgeschwindigkeit',
                                                 description:
@@ -390,7 +391,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                         ' km/h'),
                                             _dailyWeatherCard(
                                                 leading:
-                                                    Icon(WeatherIcons.sunrise),
+                                                    const Icon(WeatherIcons.sunrise),
                                                 title: 'Sonnenaufgang',
                                                 description: DateFormat('HH:mm')
                                                     .format(DateTime
@@ -407,21 +408,21 @@ class _WeatherPageState extends State<WeatherPage> {
                                           children: <Widget>[
                                             _dailyWeatherCard(
                                                 leading:
-                                                    Icon(WeatherIcons.humidity),
+                                                    const Icon(WeatherIcons.humidity),
                                                 title: 'Luftfeuchtigkeit',
                                                 description:
                                                     daily.humidity.toString() +
                                                         ' %'),
                                             _dailyWeatherCard(
                                                 leading:
-                                                    Icon(WeatherIcons.cloud),
+                                                    const Icon(WeatherIcons.cloud),
                                                 title: 'Bewölkung',
                                                 description: (daily.clouds)
                                                         .round()
                                                         .toString() +
                                                     ' %'),
                                             _dailyWeatherCard(
-                                                leading: Icon(
+                                                leading: const Icon(
                                                     WeatherIcons.barometer),
                                                 title: 'Luftdruck',
                                                 description: daily.pressure
@@ -430,7 +431,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                                     ' hPa'),
                                             _dailyWeatherCard(
                                                 leading:
-                                                    Icon(WeatherIcons.sunset),
+                                                    const Icon(WeatherIcons.sunset),
                                                 title: 'Sonnenuntergang',
                                                 description: DateFormat('HH:mm')
                                                     .format(DateTime
@@ -447,7 +448,7 @@ class _WeatherPageState extends State<WeatherPage> {
                             );
                           },
                         ),
-                        Text(
+                        const Text(
                           '\n\nWetterdaten von OpenWeatherMap',
                           textAlign: TextAlign.center,
                         ),
@@ -458,9 +459,9 @@ class _WeatherPageState extends State<WeatherPage> {
               ),
             );
           } else if (snapshot.hasError) {
-            return ErrorCard();
+            return const ErrorCard();
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -475,7 +476,7 @@ class _WeatherPageState extends State<WeatherPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         leading,
-        Padding(
+        const Padding(
           padding: EdgeInsets.only(left: 16.0),
         ),
         Flexible(
@@ -486,7 +487,7 @@ class _WeatherPageState extends State<WeatherPage> {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: FontWeight.w500),
+                style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               Text(
                 subtitle,
@@ -507,12 +508,12 @@ class _WeatherPageState extends State<WeatherPage> {
   }) {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             leading,
-            Padding(padding: EdgeInsets.only(left: 16.0)),
+            const Padding(padding: EdgeInsets.only(left: 16.0)),
             Flexible(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -521,7 +522,7 @@ class _WeatherPageState extends State<WeatherPage> {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontWeight: FontWeight.w500),
+                    style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   Text(description),
                 ],

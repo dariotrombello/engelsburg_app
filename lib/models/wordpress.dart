@@ -527,11 +527,11 @@ class Sizes {
 
   Map<String, dynamic> toJson() => {
         'medium': medium.toJson(),
-        'large': large == null ? null : large.toJson(),
+        'large': large?.toJson(),
         'thumbnail': thumbnail.toJson(),
-        'medium_large': mediumLarge == null ? null : mediumLarge.toJson(),
+        'medium_large': mediumLarge?.toJson(),
         'sidebar-featured': sidebarFeatured.toJson(),
-        'home-post': homePost == null ? null : homePost.toJson(),
+        'home-post': homePost?.toJson(),
         'crp_thumbnail': crpThumbnail.toJson(),
         'full': full.toJson(),
       };

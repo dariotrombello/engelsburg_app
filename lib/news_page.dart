@@ -13,6 +13,8 @@ import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'models/wordpress.dart';
 
 class NewsPage extends StatefulWidget {
+  const NewsPage({Key key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => NewsPageState();
 }
@@ -64,30 +66,31 @@ class NewsPageState extends State<NewsPage> {
               children: [
                 if (featuredMedia != null)
                   ClipRRect(
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(4.0),
                         topRight: Radius.circular(4.0)),
                     child: CachedNetworkImage(
                       imageUrl: featuredMedia,
                       placeholder: (context, url) => Container(),
-                      errorWidget: (context, url, error) => Icon(Icons.error),
+                      errorWidget: (context, url, error) =>
+                          const Icon(Icons.error),
                     ),
                   ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
                   child: Text(
                     renderedTitle.toString(),
-                    style:
-                        TextStyle(fontWeight: FontWeight.w500, fontSize: 18.0),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w500, fontSize: 18.0),
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Text(
                     renderedContent.toString(),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(height: 1.5),
+                    style: const TextStyle(height: 1.5),
                   ),
                 ),
                 Padding(
@@ -98,7 +101,7 @@ class NewsPageState extends State<NewsPage> {
                       Text(TimeAgo.format(post.date)),
                       IconButton(
                           tooltip: 'Teilen',
-                          icon: Icon(Icons.share),
+                          icon: const Icon(Icons.share),
                           onPressed: () {
                             Share.share(post.link);
                           }),
@@ -125,7 +128,7 @@ class NewsPageState extends State<NewsPage> {
           return RefreshIndicator(
             onRefresh: () async => setState(() {}),
             child: ListView.builder(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               itemCount: posts.length,
               itemBuilder: (context, index) {
                 final post = posts[index];
@@ -136,7 +139,7 @@ class NewsPageState extends State<NewsPage> {
             ),
           );
         }
-        return Center(
+        return const Center(
           child: CircularProgressIndicator(),
         );
       },
@@ -149,18 +152,19 @@ class NewsDetailPage extends StatelessWidget {
   final DateFormat dateFormat;
   final String featuredMedia;
 
-  NewsDetailPage({
+  const NewsDetailPage({
+    Key key,
     @required this.post,
     @required this.dateFormat,
     this.featuredMedia,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('News'),
+        title: const Text('News'),
       ),
       body: ListView(
         children: <Widget>[
@@ -168,30 +172,31 @@ class NewsDetailPage extends StatelessWidget {
             CachedNetworkImage(
               imageUrl: featuredMedia,
               placeholder: (context, url) => Container(),
-              errorWidget: (context, url, error) => Icon(Icons.error),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
             ),
           Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Text(
               post.title.rendered,
-              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+              style:
+                  const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
             ),
           ),
           if (post.date != null)
             Padding(
-              padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
+              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
               child: Text(
                 dateFormat.format(post.date),
                 style: TextStyle(
                     color: Theme.of(context).textTheme.headline1.color),
               ),
             ),
-          Divider(),
+          const Divider(),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: HtmlWidget(
               post.content.rendered,
-              textStyle: TextStyle(
+              textStyle: const TextStyle(
                   fontSize: 15.0, height: 1.5, fontFamily: 'Roboto Slab'),
               onTapUrl: (url) => url_launcher.launch(url),
             ),

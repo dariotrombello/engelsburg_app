@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:native_pdf_view/native_pdf_view.dart';
 
 class SchoolNewspaperPage extends StatefulWidget {
+  const SchoolNewspaperPage({Key key}) : super(key: key);
+
   @override
   _SchoolNewspaperPageState createState() => _SchoolNewspaperPageState();
 }
