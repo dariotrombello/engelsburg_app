@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:engelsburg_app/src/weather/models/hitzefrei_data.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -39,20 +40,32 @@ class WeatherService {
         DateTime(hitzefreiDate.year, hitzefreiDate.month, hitzefreiDate.day);
 
     final isToday = hitzefreiDateWithoutHour == today;
+    final day = isToday ? 'heute' : 'morgen';
 
-    int code;
     final temp = hitzefreiWeather.temp;
 
-    if (temp < 23) {
-      code = 0;
+    if (temp < 22) {
+      return null;
+    } else if (temp < 23) {
+      return HitzefreiData(
+          text: 'Es ist sehr unwahrscheinlich, dass es $day Hitzefrei gibt',
+          color: Colors.lightBlue,
+          isToday: isToday);
     } else if (temp < 24) {
-      code = 1;
+      return HitzefreiData(
+          text: 'Es ist eher unwahrscheinlich, dass es $day Hitzefrei gibt',
+          color: Colors.green,
+          isToday: isToday);
     } else if (temp >= 24 && temp < 26) {
-      code = 2;
+      return HitzefreiData(
+          text: 'Es ist wahrscheinlich, dass es $day Hitzefrei gibt',
+          color: Colors.orange,
+          isToday: isToday);
     } else {
-      code = 3;
+      return HitzefreiData(
+          text: 'Es ist sehr wahrscheinlich, dass es $day Hitzefrei gibt',
+          color: Colors.red,
+          isToday: isToday);
     }
-
-    return HitzefreiData(isToday: isToday, code: code);
   }
 }

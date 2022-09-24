@@ -20,8 +20,12 @@ class SubstitutionNewsDay {
 class SubstitutionDay {
   final String day;
   final List<Substitution> substitutions;
+  final String untisWeek;
 
-  SubstitutionDay({required this.substitutions, required this.day});
+  SubstitutionDay(
+      {required this.substitutions,
+      required this.day,
+      required this.untisWeek});
 }
 
 class Substitution {

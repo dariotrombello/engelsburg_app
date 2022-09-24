@@ -22,34 +22,6 @@ class _WeatherViewState extends State<WeatherView>
   @override
   bool get wantKeepAlive => true;
 
-  Color getHitzefreiColor(int code) {
-    switch (code) {
-      case 0:
-        return Colors.lightBlue;
-      case 1:
-        return Colors.green;
-      case 2:
-        return Colors.orange;
-      default:
-        return Colors.red;
-    }
-  }
-
-  String getHitzefreiText(HitzefreiData data) {
-    final day = data.isToday ? 'heute' : 'morgen';
-
-    switch (data.code) {
-      case 0:
-        return 'Es ist sehr unwahrscheinlich, dass es $day Hitzefrei gibt';
-      case 1:
-        return 'Es ist eher unwahrscheinlich, dass es $day Hitzefrei gibt';
-      case 2:
-        return 'Es ist wahrscheinlich, dass es $day Hitzefrei gibt';
-      default:
-        return 'Es ist sehr wahrscheinlich, dass es $day Hitzefrei gibt';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -115,11 +87,11 @@ class _WeatherViewState extends State<WeatherView>
               if (hitzefreiData != null)
                 Card(
                   margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
-                  color: getHitzefreiColor(hitzefreiData.code),
+                  color: hitzefreiData.color,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      getHitzefreiText(hitzefreiData),
+                      hitzefreiData.text,
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),

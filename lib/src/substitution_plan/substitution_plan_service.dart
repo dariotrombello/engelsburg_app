@@ -9,44 +9,50 @@ class SubstitutionPlanService {
     final substitutionNewsDays = <SubstitutionNewsDay>[];
     final substitutionDays = <SubstitutionDay>[];
 
-    final navbarUrl = Uri.parse(
+    final navbarPageUrl = Uri.parse(
         'https://engelsburg.smmp.de/vertretungsplaene/eng/Stp_Upload/frames/navbar.htm');
-    final navbarRes = await http.get(navbarUrl);
-    final navbarDocument = parse(navbarRes.body);
+    final navbarPageRes = await http.get(navbarPageUrl);
+    final navbarPageDocument = parse(navbarPageRes.body);
 
-    final untisWeeks = navbarDocument
+    final untisWeeks = navbarPageDocument
         .querySelectorAll('select[name=week] > option')
         .map((w) => w.attributes['value']!)
         .toList();
-    final navbarInfo = navbarDocument.querySelector('span.description')!.text;
+    final navbarInfo =
+        navbarPageDocument.querySelector('span.description')!.text;
     final lastChanged =
         navbarInfo.substring(navbarInfo.indexOf('Stand:')).trim();
 
     for (var i = 0; i < untisWeeks.length; i++) {
-      final substitutionTableUrl = Uri.parse(
+      final thisWeekSubstitutionDays = <SubstitutionDay>[];
+
+      final substitutionTablePageUrl = Uri.parse(
           'https://engelsburg.smmp.de/vertretungsplaene/eng/Stp_Upload/${untisWeeks[i]}/w/w00000.htm');
-      final substitutionTableRes = await http.get(substitutionTableUrl);
-      final substitutionTableDocument = parse(substitutionTableRes.body);
+      final substitutionTablePageRes = await http.get(substitutionTablePageUrl);
+      final substitutionTablePageDocument =
+          parse(substitutionTablePageRes.body);
+
       // Substitution days including ones with "Vertretungen sind nicht freigegeben"
-      final allSubstitutionDays =
-          substitutionTableDocument.querySelectorAll('table.subst > tbody');
+      final subtitutionTableBodys =
+          substitutionTablePageDocument.querySelectorAll('table.subst > tbody');
+
       // 6.7. Mittwoch, 7.7. Donnerstag etc.
-      final days = substitutionTableDocument
+      final dayStrings = substitutionTablePageDocument
           .querySelectorAll('#vertretung > p > b, #vertretung > b');
 
-      for (var i = 0; i < days.length; i++) {
-        final day = days[i].text;
-        final isValidSubstitutionDay =
-            allSubstitutionDays[i].querySelector('tr.list > td') != null &&
-                allSubstitutionDays[i].querySelector('tr.list > td')!.text !=
+      for (var j = 0; j < dayStrings.length; j++) {
+        final day = dayStrings[j].text;
+        final isValidSubstitutionTable =
+            subtitutionTableBodys[j].querySelector('tr.list > td') != null &&
+                subtitutionTableBodys[j].querySelector('tr.list > td')!.text !=
                     'Vertretungen sind nicht freigegeben';
 
-        if (isValidSubstitutionDay) {
-          final rows =
-              allSubstitutionDays[i].querySelectorAll('tr.list').sublist(1);
+        if (isValidSubstitutionTable) {
+          final tableRows =
+              subtitutionTableBodys[j].querySelectorAll('tr.list').sublist(1);
           final substitutions = <Substitution>[];
-          for (var row in rows) {
-            final cols = row.querySelectorAll('td');
+          for (var tableRow in tableRows) {
+            final cols = tableRow.querySelectorAll('td');
 
             // this is not a substitution - untis creates rows that just contain
             // a note column when the note has too many characters on the previous row
@@ -83,17 +89,19 @@ class SubstitutionPlanService {
             }
           }
 
-          substitutionDays
-              .add(SubstitutionDay(substitutions: substitutions, day: day));
+          thisWeekSubstitutionDays.add(SubstitutionDay(
+              substitutions: substitutions,
+              day: day,
+              untisWeek: untisWeeks[i]));
         }
       }
 
-      for (var i = 0; i < substitutionDays.length; i++) {
-        final day = substitutionDays[i].day;
+      for (var k = 0; k < thisWeekSubstitutionDays.length; k++) {
+        final day = thisWeekSubstitutionDays[k].day;
 
-        final newsTables = substitutionTableDocument
+        final newsTables = substitutionTablePageDocument
             .querySelectorAll('table[bgcolor="#F4F4F4"]');
-        final newsTexts = newsTables[i]
+        final newsTexts = newsTables[k]
             .querySelectorAll('tbody > tr')
             .sublist(1)
             .map((e) => e.text)
@@ -101,6 +109,8 @@ class SubstitutionPlanService {
         substitutionNewsDays
             .add(SubstitutionNewsDay(day: day, texts: newsTexts));
       }
+
+      substitutionDays.addAll(thisWeekSubstitutionDays);
     }
 
     return SubstitutionPlanData(

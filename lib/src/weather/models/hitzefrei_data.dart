@@ -1,6 +1,10 @@
-class HitzefreiData {
-  final bool isToday;
-  final int code;
+import 'dart:ui';
 
-  HitzefreiData({required this.isToday, required this.code});
+class HitzefreiData {
+  final String text;
+  final Color color;
+  final bool isToday;
+
+  HitzefreiData(
+      {required this.text, required this.color, required this.isToday});
 }
